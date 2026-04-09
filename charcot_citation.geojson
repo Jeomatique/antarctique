@@ -1,0 +1,8 @@
+{
+"type": "FeatureCollection",
+"name": "charcot_citation",
+"crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
+"features": [
+{ "type": "Feature", "properties": { "etape": 2, "texte": "Je suis une citation\\ndes plus intéréssantes\\nmagnifico" }, "geometry": { "type": "Point", "coordinates": [ -63.647399830766304, -62.026940527085983 ] } }
+]
+}
