@@ -8,287 +8,173 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet"/>
   <style>
-/* ── BASE ───────────────────────────────────────────── */
+/* ── BASE ─────────────────────────────────────── */
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
-html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:'EB Garamond',serif;color:#fff;}
+html,body{width:100%;height:100%;overflow:hidden;background:#0a0f1a;font-family:'EB Garamond',serif;color:#fff;}
 :root{--gold:#c8a84b;--teal:#00c8b4;--bg-full:rgba(4,12,22,.97);}
 
-/* ── MENU HAMBURGER — toujours présent ─────────────── */
+/* ── ESRI UI → déplacer vers la droite ──────── */
+.esri-ui-bottom-left{display:none!important;}
+.esri-attribution{display:none!important;}
+
+/* ── MENU HAMBURGER ─────────────────────────── */
 #menu-btn{
-  position:fixed;top:16px;left:16px;z-index:2000;
+  position:fixed;top:16px;right:6px;z-index:2000;
   background:rgba(0,0,0,0.6);border:1px solid rgba(255,255,255,0.15);
   border-radius:6px;width:40px;height:40px;
   display:flex;flex-direction:column;align-items:center;justify-content:center;
   gap:5px;cursor:pointer;backdrop-filter:blur(6px);
-  transition:background 0.2s,border-color 0.2s;
+  transition:background .2s,border-color .2s;
 }
 #menu-btn:hover{background:rgba(255,255,255,0.1);border-color:rgba(255,255,255,0.4);}
-#menu-btn span{
-  display:block;width:18px;height:2px;
-  background:rgba(255,255,255,0.8);border-radius:2px;
-  transition:background 0.2s;
-}
+#menu-btn span{display:block;width:18px;height:2px;background:rgba(255,255,255,0.8);border-radius:2px;}
 
-/* ── DRAWER GAUCHE ──────────────────────────────────── */
+/* ── DRAWER ─────────────────────────────────── */
 #drawer{
   position:fixed;top:0;left:0;z-index:1900;
   width:25vw;min-width:220px;height:100%;
-  background:rgba(4,8,16,0.97);
-  border-right:1px solid rgba(255,255,255,0.1);
-  backdrop-filter:blur(12px);
-  transform:translateX(-100%);
-  transition:transform 0.35s cubic-bezier(.4,0,.2,1);
+  background:rgba(4,8,16,0.97);border-right:1px solid rgba(255,255,255,0.1);
+  backdrop-filter:blur(12px);transform:translateX(-100%);
+  transition:transform .35s cubic-bezier(.4,0,.2,1);
   display:flex;align-items:center;justify-content:center;
 }
 #drawer.open{transform:translateX(0);}
-#drawer-close{
-  position:absolute;top:14px;right:14px;
-  background:none;border:none;color:rgba(255,255,255,0.4);
-  font-size:1.2rem;cursor:pointer;transition:color 0.2s;
-}
+#drawer-close{position:absolute;top:14px;right:14px;background:none;border:none;color:rgba(255,255,255,.4);font-size:1.2rem;cursor:pointer;transition:color .2s;}
 #drawer-close:hover{color:#fff;}
-#drawer-content{
-  text-align:center;padding:40px 24px;
-  font-family:'EB Garamond',serif;
-  font-size:1rem;font-style:italic;
-  color:rgba(255,255,255,0.5);
-  letter-spacing:0.04em;line-height:1.8;
-}
-/* Overlay pour fermer drawer en cliquant à côté */
-#drawer-overlay{
-  position:fixed;inset:0;z-index:1800;
-  display:none;background:rgba(0,0,0,0.3);
-}
+#drawer-content{text-align:center;padding:40px 24px;font-family:'EB Garamond',serif;font-size:1rem;font-style:italic;color:rgba(255,255,255,.5);letter-spacing:.04em;line-height:1.8;}
+#drawer-overlay{position:fixed;inset:0;z-index:1800;display:none;background:rgba(0,0,0,.3);}
 #drawer-overlay.open{display:block;}
 
-/* ── SPLASH ─────────────────────────────────────────── */
-#splash{
-  position:fixed;inset:0;z-index:1000;
-  display:flex;flex-direction:column;
-  background:#000;cursor:pointer;
-  overflow:hidden;
-}
-.strip-wrap{
-  flex:1;overflow:hidden;position:relative;
-  mask-image:linear-gradient(to right,transparent 0%,black 6%,black 94%,transparent 100%);
-  -webkit-mask-image:linear-gradient(to right,transparent 0%,black 6%,black 94%,transparent 100%);
-}
-.strip{
-  display:flex;gap:8px;align-items:center;
-  height:100%;position:absolute;top:0;left:0;
-  will-change:transform;white-space:nowrap;
-}
-.strip img{
-  height:calc(100% - 8px);width:auto;
-  border-radius:4px;object-fit:cover;flex-shrink:0;
-  pointer-events:none;
-  filter:brightness(0.7) saturate(0.75);
-}
-
-/* Ruban splash — Z-INDEX élevé pour passer AU-DESSUS des strips */
+/* ── SPLASH ─────────────────────────────────── */
+#splash{position:fixed;inset:0;z-index:1000;display:flex;flex-direction:column;background:#000;cursor:pointer;overflow:hidden;}
+.strip-wrap{flex:1;overflow:hidden;position:relative;mask-image:linear-gradient(to right,transparent 0%,black 6%,black 94%,transparent 100%);-webkit-mask-image:linear-gradient(to right,transparent 0%,black 6%,black 94%,transparent 100%);}
+.strip{display:flex;gap:8px;align-items:center;height:100%;position:absolute;top:0;left:0;will-change:transform;white-space:nowrap;}
+.strip img{height:calc(100% - 8px);width:auto;border-radius:4px;object-fit:cover;flex-shrink:0;pointer-events:none;filter:brightness(.7) saturate(.75);}
 #ribbon{
-  position:absolute;
-  top:50%;left:0;right:0;
-  transform:translateY(-50%);
-  z-index:20;   /* <-- au-dessus des .strip-wrap */
-  background:rgba(0,0,0,0.92);
-  padding:28px 60px;
-  display:flex;flex-direction:column;align-items:center;justify-content:center;
-  text-align:center;
-  border-top:1px solid rgba(255,255,255,0.14);
-  border-bottom:1px solid rgba(255,255,255,0.14);
-  transition:transform 0.7s cubic-bezier(.77,0,.18,1),opacity 0.5s ease;
+  position:absolute;top:50%;left:0;right:0;
+  transform:translateY(-50%);z-index:20;
+  background:rgba(0,0,0,.92);padding:28px 60px;
+  display:flex;flex-direction:column;align-items:center;text-align:center;
+  border-top:1px solid rgba(255,255,255,.14);border-bottom:1px solid rgba(255,255,255,.14);
+  transition:transform .7s cubic-bezier(.77,0,.18,1),opacity .5s ease;
   transform-origin:center center;
 }
-#ribbon.closing{
-  transform:translateY(-50%) scaleY(0);
-  opacity:0;
-}
-.ribbon-title{
-  font-family:'Cinzel',serif;font-size:clamp(1rem,2.2vw,1.85rem);
-  font-weight:600;letter-spacing:0.06em;line-height:1.45;color:#fff;margin-bottom:14px;
-}
-.ribbon-sub{
-  font-family:'EB Garamond',serif;font-style:italic;
-  font-size:clamp(0.85rem,1.5vw,1.3rem);color:rgba(255,255,255,0.7);
-  letter-spacing:0.03em;
-}
-.ribbon-click{
-  margin-top:18px;font-size:0.72rem;letter-spacing:0.2em;
-  text-transform:uppercase;color:rgba(255,255,255,0.35);
-  animation:pulse-hint 2s ease-in-out infinite;
-}
+#ribbon.closing{transform:translateY(-50%) scaleY(0);opacity:0;}
+.ribbon-title{font-family:'Cinzel',serif;font-size:clamp(1rem,2.2vw,1.85rem);font-weight:600;letter-spacing:.06em;line-height:1.45;color:#fff;margin-bottom:14px;}
+.ribbon-sub{font-family:'EB Garamond',serif;font-style:italic;font-size:clamp(.85rem,1.5vw,1.3rem);color:rgba(255,255,255,.7);letter-spacing:.03em;}
+.ribbon-click{margin-top:18px;font-size:.72rem;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.35);animation:pulse-hint 2s ease-in-out infinite;}
 @keyframes pulse-hint{0%,100%{opacity:.35;}50%{opacity:.85;}}
 
-/* ── APP ────────────────────────────────────────────── */
+/* ── APP ────────────────────────────────────── */
 #app{position:fixed;inset:0;z-index:1;display:none;}
 #viewDiv{position:absolute;inset:0;}
-
-/* Voile */
-#veil{
-  position:absolute;inset:0;z-index:500;
-  background:rgba(0,0,0,0.82);
-  transition:opacity 1.4s ease;pointer-events:none;
-}
+#veil{position:absolute;inset:0;z-index:500;background:rgba(0,0,0,.82);transition:opacity 1.4s ease;pointer-events:none;}
 #veil.lifted{opacity:0;}
-
-/* Ruban citation dans app */
 #ribbon-app{
-  position:absolute;top:50%;left:0;right:0;
-  transform:translateY(-50%);
-  background:rgba(0,0,0,0.92);padding:28px 60px;
-  display:flex;flex-direction:column;align-items:center;
-  text-align:center;
-  border-top:1px solid rgba(255,255,255,0.14);
-  border-bottom:1px solid rgba(255,255,255,0.14);
-  z-index:600;
-  transition:opacity 0.8s ease,transform 0.7s cubic-bezier(.77,0,.18,1);
+  position:absolute;top:50%;left:0;right:0;transform:translateY(-50%);
+  background:rgba(0,0,0,.92);padding:28px 60px;
+  display:flex;flex-direction:column;align-items:center;text-align:center;
+  border-top:1px solid rgba(255,255,255,.14);border-bottom:1px solid rgba(255,255,255,.14);
+  z-index:600;transition:opacity .8s ease,transform .7s cubic-bezier(.77,0,.18,1);
   transform-origin:center center;
 }
 #ribbon-app.hidden-ribbon{opacity:0;pointer-events:none;}
-.citation-text{
-  font-family:'EB Garamond',serif;font-style:italic;
-  font-size:clamp(1rem,1.8vw,1.55rem);line-height:1.75;
-  color:rgba(255,255,255,0.9);max-width:800px;
+.citation-text{font-family:'EB Garamond',serif;font-style:italic;font-size:clamp(1rem,1.8vw,1.55rem);line-height:1.75;color:rgba(255,255,255,.9);max-width:800px;}
+.citation-author{margin-top:16px;font-family:'Cinzel',serif;font-size:.78rem;letter-spacing:.16em;color:rgba(200,200,200,.65);text-transform:uppercase;}
+
+/* ── EXPLORER NAME BANNER ───────────────────── */
+#explorer-banner{
+  position:absolute;top:50%;left:0;right:0;z-index:700;
+  display:flex;align-items:center;justify-content:center;
+  pointer-events:none;transform:translateY(-50%);
+  opacity:0;transition:opacity .3s ease;
 }
-.citation-author{
-  margin-top:16px;font-family:'Cinzel',serif;
-  font-size:0.78rem;letter-spacing:0.16em;
-  color:rgba(255,255,255,0.45);text-transform:uppercase;
+#explorer-banner.show{opacity:1;}
+#explorer-banner-inner{
+  background:rgba(0,0,0,.0);
+  padding:0;
+  overflow:hidden;
+  height:0;
+  display:flex;align-items:center;justify-content:center;
+  transition:height .4s cubic-bezier(.77,0,.18,1),padding .4s;
+}
+#explorer-banner.show #explorer-banner-inner{
+  height:80px;padding:0 60px;
+  background:linear-gradient(90deg,transparent,rgba(0,0,0,.85) 15%,rgba(0,0,0,.85) 85%,transparent);
+  border-top:1px solid rgba(255,255,255,.2);border-bottom:1px solid rgba(255,255,255,.2);
+}
+#explorer-banner-text{
+  font-family:'Cinzel',serif;font-size:clamp(1.2rem,3vw,2.2rem);
+  font-weight:600;letter-spacing:.18em;text-transform:uppercase;
+  color:#fff;white-space:nowrap;
+  text-shadow:0 0 30px rgba(255,255,255,.4),0 2px 8px rgba(0,0,0,.8);
 }
 
-/* Toast */
-#toast{
-  position:absolute;top:70px;left:50%;transform:translateX(-50%);
-  background:var(--gold);color:#000;padding:8px 18px;border-radius:3px;
-  font-weight:bold;font-size:.8rem;letter-spacing:1px;
-  opacity:0;transition:opacity .4s;z-index:300;pointer-events:none;white-space:nowrap;
-  font-family:'Courier New',monospace;
-}
+/* ── TOAST ──────────────────────────────────── */
+#toast{position:absolute;top:70px;left:50%;transform:translateX(-50%);background:var(--gold);color:#000;padding:8px 18px;border-radius:3px;font-weight:bold;font-size:.8rem;letter-spacing:1px;opacity:0;transition:opacity .4s;z-index:300;pointer-events:none;white-space:nowrap;font-family:'Courier New',monospace;}
 #toast.show{opacity:1;}
 
-/* ── UI BAS : portraits + contrôles ────────────────── */
+/* ── BOTTOM UI ──────────────────────────────── */
 #bottom-ui{
-  position:absolute;bottom:24px;left:50%;transform:translateX(-50%);
+  position:absolute;bottom:60px;left:50%;transform:translateX(-50%);
   z-index:200;display:flex;flex-direction:column;align-items:center;gap:10px;
-  user-select:none;opacity:0;transition:opacity 0.8s ease;
+  user-select:none;opacity:0;transition:opacity .8s ease;
 }
 #bottom-ui.visible{opacity:1;}
-
-/* Rangée portraits + étapes */
-#explorer-row{
-  display:flex;align-items:center;gap:10px;
-}
-
-/* Portraits explorateurs */
-.explorer-portrait{
-  width:60px;height:60px;border-radius:50%;
-  object-fit:cover;cursor:pointer;
-  filter:grayscale(1) brightness(0.8);
-  transition:transform 0.25s ease,filter 0.25s ease,box-shadow 0.25s ease;
-  border:2px solid rgba(255,255,255,0.1);
-  flex-shrink:0;
-}
-.explorer-portrait.active{
-  filter:grayscale(0) brightness(1);
-  transform:scale(1.2);
-  border-color:var(--gold);
-  box-shadow:0 0 14px rgba(200,168,75,0.4);
-}
-.explorer-portrait:hover:not(.active){
-  filter:grayscale(0.5) brightness(0.95);
-  transform:scale(1.05);
-}
-
-/* Séparateur vertical entre portraits et étapes */
-.portrait-sep{
-  width:1px;height:56px;
-  background:rgba(255,255,255,0.12);
-  flex-shrink:0;
-}
-
-#ctrl-bar{
-  display:flex;gap:8px;align-items:center;
-  background:var(--bg-full);border:1px solid rgba(255,255,255,.08);
-  padding:5px 14px;border-radius:3px;
-}
-#ctrl-bar button{
-  background:transparent;border:none;color:rgba(255,255,255,.55);
-  font-family:'Courier New',monospace;font-size:.7rem;letter-spacing:1px;
-  text-transform:uppercase;cursor:pointer;padding:3px 8px;transition:color .2s;
-}
+#ctrl-bar{display:flex;gap:8px;align-items:center;background:var(--bg-full);border:1px solid rgba(255,255,255,.08);padding:5px 14px;border-radius:3px;}
+#ctrl-bar button{background:transparent;border:none;color:rgba(255,255,255,.55);font-family:'Courier New',monospace;font-size:.7rem;letter-spacing:1px;text-transform:uppercase;cursor:pointer;padding:3px 8px;transition:color .2s;}
 #ctrl-bar button:hover{color:var(--gold);}
 #ctrl-bar .sep{width:1px;height:14px;background:rgba(255,255,255,.12);}
+#explorer-row{display:flex;align-items:center;gap:10px;}
 
+/* Portraits explorateurs */
+.explorer-portrait{width:56px;height:56px;border-radius:50%;object-fit:cover;cursor:pointer;filter:grayscale(1) brightness(.8);transition:transform .25s,filter .25s,box-shadow .25s;border:2px solid rgba(255,255,255,.1);flex-shrink:0;}
+.explorer-portrait.active{filter:grayscale(0) brightness(1);transform:scale(1.2);border-color:var(--gold);box-shadow:0 0 14px rgba(200,168,75,.4);}
+.explorer-portrait:hover:not(.active){filter:grayscale(.5);transform:scale(1.05);}
+.portrait-sep{width:1px;height:56px;background:rgba(255,255,255,.12);flex-shrink:0;}
+
+/* Stages */
 #stages-row{display:flex;align-items:center;}
-.arrow-btn{
-  background:var(--bg-full);border:1px solid rgba(255,255,255,.08);
-  color:rgba(255,255,255,.4);font-size:1.2rem;cursor:pointer;
-  width:28px;height:80px;display:flex;align-items:center;justify-content:center;
-  transition:color .2s,background .2s;flex-shrink:0;
-}
+.arrow-btn{background:var(--bg-full);border:1px solid rgba(255,255,255,.08);color:rgba(255,255,255,.4);font-size:1.2rem;cursor:pointer;width:28px;height:80px;display:flex;align-items:center;justify-content:center;transition:color .2s,background .2s;flex-shrink:0;}
 .arrow-btn:hover{color:var(--gold);background:rgba(200,168,75,.08);}
 .arrow-btn.hidden{visibility:hidden;pointer-events:none;}
 #stages-viewport{display:flex;gap:6px;overflow:hidden;}
-.stage-rect{
-  width:120px;height:80px;background:rgba(0,0,0,.50);
-  border:1px solid rgba(255,255,255,.07);cursor:pointer;
-  position:relative;overflow:hidden;
-  transition:border-color .25s,background .25s;flex-shrink:0;
-  display:flex;align-items:center;justify-content:center;
-}
+.stage-rect{width:120px;height:80px;background:rgba(0,0,0,.50);border:1px solid rgba(255,255,255,.07);cursor:pointer;position:relative;overflow:hidden;transition:border-color .25s,background .25s;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
 .stage-rect:hover{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.22);}
 .stage-rect.active{border-color:rgba(255,255,255,.35);}
 .stage-rect.done{border-color:rgba(0,200,180,.3);}
-.stage-label{
-  font-size:1.6rem;font-weight:700;letter-spacing:2px;
-  color:rgba(255,255,255,.15);transition:color .2s;
-  position:relative;z-index:2;pointer-events:none;
-  font-family:'Courier New',monospace;
-}
+.stage-label{font-size:1.4rem;font-weight:700;letter-spacing:2px;color:rgba(255,255,255,.15);transition:color .2s;position:relative;z-index:2;pointer-events:none;font-family:'Courier New',monospace;}
 .stage-rect:hover .stage-label{color:rgba(255,255,255,.5);}
 .stage-rect.active .stage-label{color:rgba(255,255,255,.9);}
 .stage-rect.done .stage-label{color:rgba(0,200,180,.6);}
-.stage-progress{
-  position:absolute;bottom:0;left:0;height:100%;width:0%;
-  background:rgba(255,255,255,.10);z-index:1;transition:width .08s linear;
-}
-.stage-dot{
-  position:absolute;bottom:5px;left:50%;transform:translateX(-50%);
-  width:5px;height:5px;border-radius:50%;
-  background:var(--teal);opacity:0;transition:opacity .3s;z-index:3;
-}
+.stage-progress{position:absolute;bottom:0;left:0;height:100%;width:0%;background:rgba(255,255,255,.10);z-index:1;transition:width .08s linear;}
+.stage-dot{position:absolute;bottom:5px;left:50%;transform:translateX(-50%);width:5px;height:5px;border-radius:50%;background:var(--teal);opacity:0;transition:opacity .3s;z-index:3;}
 .stage-rect.active .stage-dot{opacity:1;}
 
-/* ── BASEMAP ────────────────────────────────────────── */
-#basemap-btn{
-  position:absolute;bottom:24px;right:24px;z-index:200;
-  width:48px;height:48px;border-radius:12px;
-  background:rgba(4,12,22,.88);border:1px solid rgba(255,255,255,.12);
-  cursor:pointer;display:flex;align-items:center;justify-content:center;
-  backdrop-filter:blur(10px);
-  transition:border-color .2s,transform .15s,opacity .8s;
-  box-shadow:0 4px 20px rgba(0,0,0,.5);opacity:0;
+/* Cercles thématiques (Final / Fonte) */
+.theme-circle{
+  width:56px;height:56px;border-radius:50%;
+  border:2px solid rgba(255,255,255,.2);
+  background:rgba(0,0,0,.5);
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;flex-shrink:0;
+  transition:transform .25s,border-color .25s,background .25s;
+  font-family:'Cinzel',serif;font-size:.6rem;letter-spacing:.06em;
+  text-align:center;line-height:1.2;
 }
+.theme-circle:hover{transform:scale(1.1);border-color:var(--gold);}
+.theme-circle.active{transform:scale(1.2);border-color:var(--gold);background:rgba(200,168,75,.15);box-shadow:0 0 14px rgba(200,168,75,.3);}
+.theme-circle.tc-final{color:#7be8ff;}
+.theme-circle.tc-fonte{color:#ff9f7b;}
+
+/* ── BASEMAP ────────────────────────────────── */
+#basemap-btn{position:absolute;bottom:68px;right:24px;z-index:200;width:48px;height:48px;border-radius:12px;background:rgba(4,12,22,.88);border:1px solid rgba(255,255,255,.12);cursor:pointer;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(10px);transition:border-color .2s,transform .15s,opacity .8s;box-shadow:0 4px 20px rgba(0,0,0,.5);opacity:0;}
 #basemap-btn.visible{opacity:1;}
 #basemap-btn:hover{border-color:rgba(200,168,75,.5);transform:translateY(-1px);}
-#basemap-btn svg{width:22px;height:22px;opacity:.7;transition:opacity .2s;}
-#basemap-btn:hover svg{opacity:1;}
-#basemap-panel{
-  position:absolute;bottom:82px;right:24px;z-index:200;
-  display:flex;flex-direction:column;gap:8px;
-  opacity:0;pointer-events:none;transform:translateY(10px);
-  transition:opacity .22s,transform .22s;
-}
+#basemap-btn svg{width:22px;height:22px;opacity:.7;}
+#basemap-panel{position:absolute;bottom:126px;right:24px;z-index:200;display:flex;flex-direction:column;gap:8px;opacity:0;pointer-events:none;transform:translateY(10px);transition:opacity .22s,transform .22s;}
 #basemap-panel.open{opacity:1;pointer-events:all;transform:translateY(0);}
-.bm-card{
-  width:160px;height:52px;background:rgba(4,12,22,.92);
-  border:1px solid rgba(255,255,255,.08);border-radius:10px;
-  cursor:pointer;display:flex;align-items:center;gap:10px;padding:0 12px;
-  backdrop-filter:blur(12px);
-  transition:border-color .18s,background .18s,transform .15s;
-  box-shadow:0 2px 14px rgba(0,0,0,.4);
-}
+.bm-card{width:160px;height:52px;background:rgba(4,12,22,.92);border:1px solid rgba(255,255,255,.08);border-radius:10px;cursor:pointer;display:flex;align-items:center;gap:10px;padding:0 12px;backdrop-filter:blur(12px);transition:border-color .18s,background .18s,transform .15s;box-shadow:0 2px 14px rgba(0,0,0,.4);}
 .bm-card:hover{border-color:rgba(200,168,75,.4);background:rgba(10,24,40,.97);transform:translateX(-4px);}
 .bm-card.active{border-color:rgba(200,168,75,.7);background:rgba(200,168,75,.08);}
 .bm-thumb{width:32px;height:32px;border-radius:6px;overflow:hidden;flex-shrink:0;border:1px solid rgba(255,255,255,.1);}
@@ -296,114 +182,169 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:'EB
 .bm-name{font-family:'Courier New',monospace;font-size:.68rem;letter-spacing:.06em;color:rgba(255,255,255,.7);line-height:1.3;text-transform:uppercase;}
 .bm-card.active .bm-name{color:var(--gold);}
 
-/* ── PERSONNAGE ─────────────────────────────────────── */
-#character-wrap{
-  position:absolute;bottom:36px;left:80px;
-  z-index:400;display:flex;align-items:flex-end;gap:0;
-  opacity:0;transition:opacity 0.8s ease;pointer-events:none;
-}
+/* ── PERSONNAGE ─────────────────────────────── */
+#character-wrap{position:absolute;bottom:68px;left:80px;z-index:400;display:flex;align-items:flex-end;gap:0;opacity:0;transition:opacity .8s ease;pointer-events:none;}
 #character-wrap.visible{opacity:1;pointer-events:all;}
-#perso-img{
-  height:20vh;width:auto;object-fit:contain;display:block;
-  filter:drop-shadow(0 4px 16px rgba(0,0,0,0.7));
-}
-#bubble{
-  position:relative;bottom:10px;
-  background:rgba(5,5,5,0.92);
-  border:1px solid rgba(255,255,255,0.15);
-  border-radius:12px 12px 12px 0;
-  padding:16px 20px 14px 18px;
-  max-width:300px;min-width:180px;
-  box-shadow:0 8px 32px rgba(0,0,0,0.6);
-  margin-left:14px;
-}
-#bubble::before{
-  content:'';position:absolute;left:-11px;bottom:18px;
-  border:6px solid transparent;border-right-color:rgba(5,5,5,0.92);
-}
-#bubble-text{
-  font-family:'EB Garamond',serif;font-size:0.9rem;
-  line-height:1.6;color:rgba(255,255,255,0.85);
-}
-#bubble-close{
-  position:absolute;top:7px;right:9px;
-  background:none;border:none;color:rgba(255,255,255,0.4);
-  font-size:1rem;cursor:pointer;line-height:1;transition:color 0.2s;
-}
+#perso-img{height:20vh;width:auto;object-fit:contain;display:block;filter:drop-shadow(0 4px 16px rgba(0,0,0,.7));}
+#bubble{position:relative;bottom:10px;background:rgba(5,5,5,.92);border:1px solid rgba(255,255,255,.15);border-radius:12px 12px 12px 0;padding:16px 20px 14px 18px;max-width:300px;min-width:180px;box-shadow:0 8px 32px rgba(0,0,0,.6);margin-left:14px;}
+#bubble::before{content:'';position:absolute;left:-11px;bottom:18px;border:6px solid transparent;border-right-color:rgba(5,5,5,.92);}
+#bubble-text{font-family:'EB Garamond',serif;font-size:.9rem;line-height:1.6;color:rgba(255,255,255,.85);}
+#bubble-close{position:absolute;top:7px;right:9px;background:none;border:none;color:rgba(255,255,255,.4);font-size:1rem;cursor:pointer;line-height:1;transition:color .2s;}
 #bubble-close:hover{color:#fff;}
+
+/* ── LÉGENDE ────────────────────────────────── */
+#legend-box{
+  position:absolute;bottom:68px;left:20px;z-index:200;
+  background:rgba(4,12,22,.82);border:1px solid rgba(255,255,255,.12);
+  border-radius:12px;padding:14px 18px;
+  min-width:180px;max-width:260px;
+  max-height:50vh;
+  overflow-y:auto;
+  /* Scrollbar discrète style thème */
+  scrollbar-width:thin;
+  scrollbar-color:rgba(255,255,255,0.2) transparent;
+  backdrop-filter:blur(8px);
+  opacity:0;transform:scale(0.9);
+  transition:opacity .6s ease,transform .6s ease;
+  pointer-events:none;
+}
+/* Webkit scrollbar */
+#legend-box::-webkit-scrollbar{width:4px;}
+#legend-box::-webkit-scrollbar-track{background:transparent;}
+#legend-box::-webkit-scrollbar-thumb{
+  background:rgba(255,255,255,0.18);
+  border-radius:4px;
+}
+#legend-box::-webkit-scrollbar-thumb:hover{background:rgba(255,255,255,0.35);}
+#legend-box.visible{opacity:1;transform:scale(1);}
+#legend-box-img{width:100%;max-height:calc(50vh - 80px);object-fit:contain;border-radius:6px;margin-top:8px;}
+#legend-box h4{font-family:'Cinzel',serif;font-size:.7rem;letter-spacing:.12em;color:rgba(255,255,255,.5);text-transform:uppercase;margin-bottom:10px;border-bottom:1px solid rgba(255,255,255,.08);padding-bottom:6px;}
+.legend-item{display:flex;align-items:center;gap:8px;margin-bottom:6px;font-family:'EB Garamond',serif;font-size:.82rem;color:rgba(255,255,255,.7);}
+.legend-line{width:24px;height:3px;background:#c80a0a;border-radius:2px;flex-shrink:0;}
+.legend-dot-teal{width:10px;height:10px;border-radius:50%;background:var(--teal);flex-shrink:0;}
+.legend-dot-blue{width:10px;height:10px;border-radius:50%;background:#7bb8ff;border:2px solid #3a7acc;flex-shrink:0;}
+
+/* ── ICONE INFO (cercles + ligne 3D via canvas ArcGIS) ─ */
+/* Le popup futuriste */
+#info-popup{
+  position:absolute;top:50%;left:50%;z-index:600;
+  transform:translate(-50%,-50%) scaleY(0);
+  background:rgba(8,18,36,.88);border:1px solid rgba(100,180,255,.3);
+  border-radius:10px;padding:24px 28px;max-width:420px;min-width:260px;
+  backdrop-filter:blur(14px);box-shadow:0 0 40px rgba(60,140,255,.2);
+  transition:transform .4s cubic-bezier(.77,0,.18,1),opacity .3s;
+  opacity:0;pointer-events:none;
+  font-family:'EB Garamond',serif;
+}
+#info-popup.open{transform:translate(-50%,-50%) scaleY(1);opacity:1;pointer-events:all;}
+#info-popup-title{font-family:'Cinzel',serif;font-size:.8rem;letter-spacing:.14em;color:rgba(100,180,255,.8);text-transform:uppercase;margin-bottom:10px;}
+#info-popup-text{font-size:1rem;line-height:1.65;color:rgba(255,255,255,.85);}
+#info-popup-close{position:absolute;top:8px;right:12px;background:none;border:none;color:rgba(255,255,255,.4);font-size:1.1rem;cursor:pointer;}
+#info-popup-close:hover{color:#fff;}
+
+/* ── CITATION POPUP ─────────────────────────── */
+/* Citation fixée au point géo via canvas overlay */
+#cit-canvas{position:absolute;inset:0;pointer-events:none;z-index:8;}
+
+/* ── FOOTER BANDEAU ─────────────────────────── */
+#footer-bar{
+  position:absolute;bottom:0;left:0;right:0;z-index:250;
+  height:50px;background:rgba(255,255,255,.97);
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 20px;
+  opacity:0;transition:opacity .8s ease;
+}
+#footer-bar.visible{opacity:1;}
+#footer-logos{display:flex;align-items:center;gap:12px;}
+#footer-logos img{height:34px;width:auto;object-fit:contain;}
+#footer-credit a{font-family:'EB Garamond',serif;font-size:.85rem;color:#222;text-decoration:underline;letter-spacing:.02em;}
+
+    /* ── PANNEAU DEBUG ─────────────────────────── */
+    #debug-toggle{
+      position:fixed;bottom:60px;left:8px;z-index:3001;
+      background:rgba(2,8,16,0.88);border:1px solid rgba(0,200,180,0.25);
+      border-radius:5px;padding:5px 10px;color:var(--teal);
+      font-family:'Courier New',monospace;font-size:.62rem;cursor:pointer;
+      letter-spacing:1px;transition:border-color .2s;
+    }
+    #debug-toggle:hover{border-color:var(--teal);}
+    #debug-panel{
+      position:fixed;bottom:90px;left:8px;z-index:3000;
+      width:440px;max-height:320px;
+      background:rgba(2,8,16,0.96);border:1px solid rgba(0,200,180,0.3);
+      border-radius:6px;font-family:'Courier New',monospace;font-size:.62rem;
+      color:#00c8b4;display:none;flex-direction:column;pointer-events:all;
+      box-shadow:0 4px 24px rgba(0,0,0,.8);
+    }
+    #debug-panel.open{display:flex;}
+    #dbg-hdr{display:flex;align-items:center;gap:6px;padding:5px 8px;
+      border-bottom:1px solid rgba(0,200,180,0.2);background:rgba(0,200,180,0.06);flex-shrink:0;}
+    #dbg-hdr b{flex:1;color:var(--teal);letter-spacing:1px;}
+    .dbg-btn{background:none;border:1px solid rgba(0,200,180,0.3);border-radius:3px;
+      color:var(--teal);cursor:pointer;font-size:.58rem;font-family:'Courier New',monospace;
+      padding:2px 7px;transition:background .15s;}
+    .dbg-btn:hover{background:rgba(0,200,180,0.15);}
+    .dbg-btn.red{border-color:rgba(255,80,80,.4);color:rgba(255,120,120,.8);}
+    .dbg-btn.red:hover{background:rgba(255,80,80,.15);}
+    .dbg-btn.close{border:none;font-size:.9rem;padding:0 6px;}
+    #dbg-log{overflow-y:auto;padding:5px 8px;flex:1;display:flex;flex-direction:column;gap:1px;
+      scrollbar-width:thin;scrollbar-color:rgba(0,200,180,.25) transparent;}
+    #dbg-log::-webkit-scrollbar{width:3px;}
+    #dbg-log::-webkit-scrollbar-thumb{background:rgba(0,200,180,.25);border-radius:3px;}
+    .dl{line-height:1.45;word-break:break-all;padding-bottom:1px;border-bottom:1px solid rgba(255,255,255,.03);}
+    .dl.i{color:#7af0d0;}.dl.w{color:#f0c87a;}.dl.e{color:#f07a7a;}.dl.ok{color:#7af07a;}
   </style>
 </head>
 <body>
 
-<!-- ═══════════════════════════════════════
-     MENU HAMBURGER — toujours visible
-═══════════════════════════════════════ -->
-<div id="menu-btn" onclick="toggleDrawer()" role="button" aria-label="Menu">
-  <span></span><span></span><span></span>
-</div>
-
+<!-- Menu hamburger — toujours présent -->
+<div id="menu-btn" onclick="toggleDrawer()"><span></span><span></span><span></span></div>
 <div id="drawer-overlay" onclick="closeDrawer()"></div>
 <div id="drawer">
   <button id="drawer-close" onclick="closeDrawer()">✕</button>
-  <div id="drawer-content">
-    Redirection vers<br>les autres projets
-  </div>
+  <div id="drawer-content">Redirection vers<br>les autres projets</div>
 </div>
 
-<!-- ═══════════════════════════════════════
-     SPLASH
-═══════════════════════════════════════ -->
+<!-- ═══ SPLASH ═══════════════════════════════ -->
 <div id="splash" onclick="startTransition()">
-
-  <div class="strip-wrap" style="flex:1;">
-    <div class="strip" id="strip-top"></div>
-  </div>
-
-  <!-- Ruban z-index:20 → au-dessus des images -->
+  <div class="strip-wrap" style="flex:1;"><div class="strip" id="strip-top"></div></div>
   <div id="ribbon">
-    <div class="ribbon-title">
-      Les regards contemporains en Antarctique,<br>
-      dans le sillage des premières expéditions australes&nbsp;?
-    </div>
+    <div class="ribbon-title">Les regards contemporains en Antarctique,<br>dans le sillage des premières expéditions australes&nbsp;?</div>
     <div class="ribbon-sub">Révéler le plus isolé des continents</div>
     <div class="ribbon-click">— Cliquer pour commencer —</div>
   </div>
-
-  <div class="strip-wrap" style="flex:1;">
-    <div class="strip" id="strip-bot"></div>
-  </div>
+  <div class="strip-wrap" style="flex:1;"><div class="strip" id="strip-bot"></div></div>
 </div>
 
-<!-- ═══════════════════════════════════════
-     APP
-═══════════════════════════════════════ -->
+<!-- ═══ APP ═══════════════════════════════════ -->
 <div id="app">
   <div id="viewDiv"></div>
   <div id="veil"></div>
 
+
+  <!-- Ruban citation transition -->
   <div id="ribbon-app">
-    <div class="citation-text">
-      « L'exploration polaire est, de toutes les façons de souffrir,<br>
-      la plus propre et solitaire que l'on ait jamais imaginée. »
-    </div>
+    <div class="citation-text">« L'exploration polaire est, de toutes les façons de souffrir,<br>la plus propre et solitaire que l'on ait jamais imaginée. »</div>
     <div class="citation-author">Robert Falcon Scott</div>
   </div>
 
+  <!-- Bannière nom explorateur (style jeu vidéo) -->
+  <div id="explorer-banner"><div id="explorer-banner-inner"><div id="explorer-banner-text"></div></div></div>
+
   <div id="toast">Message</div>
 
+  <!-- Basemap -->
   <button id="basemap-btn" onclick="toggleBasemapPanel()" title="Fond de carte">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="color:var(--teal)">
-      <path d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/>
-    </svg>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="color:var(--teal)"><path d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/></svg>
   </button>
   <div id="basemap-panel">
-    <div class="bm-card active" data-bm="satellite" onclick="setBasemap('satellite',this)">
+    <div class="bm-card active" data-bm="dark" onclick="setBasemap('dark',this)">
+      <div class="bm-thumb" style="background:#1a2030;border-radius:6px;display:flex;align-items:center;justify-content:center;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.5)" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><path d="M3.6 9h16.8M3.6 15h16.8M12 3a15 15 0 010 18M12 3a15 15 0 000 18"/></svg></div>
+      <div class="bm-name">Vectoriel<br><span style="opacity:.5;font-size:.6rem">Léger (défaut)</span></div>
+    </div>
+    <div class="bm-card" data-bm="satellite" onclick="setBasemap('satellite',this)">
       <div class="bm-thumb"><img src="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/2/1/2" alt=""/></div>
       <div class="bm-name">Satellite<br><span style="opacity:.5;font-size:.6rem">ESRI Imagery</span></div>
-    </div>
-    <div class="bm-card" data-bm="watercolor" onclick="setBasemap('watercolor',this)">
-      <div class="bm-thumb"><img src="https://tiles.stadiamaps.com/tiles/stamen_watercolor/2/1/2.jpg" alt=""/></div>
-      <div class="bm-name">Aquarelle<br><span style="opacity:.5;font-size:.6rem">Stamen / Stadia</span></div>
     </div>
     <div class="bm-card" data-bm="physical" onclick="setBasemap('physical',this)">
       <div class="bm-thumb"><img src="https://server.arcgisonline.com/ArcGIS/rest/services/World_Physical_Map/MapServer/tile/2/1/2" alt=""/></div>
@@ -411,6 +352,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:'EB
     </div>
   </div>
 
+  <!-- UI bas -->
   <div id="bottom-ui">
     <div id="ctrl-bar">
       <button id="btnPlay" onclick="ctrlPlay()">&#9654; Lancer</button>
@@ -418,29 +360,75 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:'EB
       <button onclick="ctrlReset()">&#8635; Reset</button>
     </div>
     <div id="explorer-row">
-      <!-- Portraits explorateurs (générés dynamiquement) -->
       <div id="portraits-wrap" style="display:flex;gap:8px;align-items:center;"></div>
       <div class="portrait-sep"></div>
-      <!-- Étapes -->
       <div id="stages-row">
         <button class="arrow-btn hidden" id="arrowLeft" onclick="shiftView(-1)">&#8249;</button>
         <div id="stages-viewport"></div>
         <button class="arrow-btn hidden" id="arrowRight" onclick="shiftView(1)">&#8250;</button>
       </div>
+      <div class="portrait-sep"></div>
+      <!-- Cercles thématiques -->
+      <div style="display:flex;gap:8px;">
+        <div class="theme-circle tc-final" id="tc-final" onclick="selectTheme('final',this)">Final</div>
+        <div class="theme-circle tc-fonte" id="tc-fonte" onclick="selectTheme('fonte',this)">Fonte</div>
+      </div>
     </div>
   </div>
 
+  <!-- Popup info -->
+  <div id="info-popup">
+    <div id="info-popup-title">Information</div>
+    <div id="info-popup-text"></div>
+    <button id="info-popup-close" onclick="closeInfoPopup()">✕</button>
+  </div>
+
+  <!-- Citation -->
+  <canvas id="cit-canvas"></canvas>
+
+  <!-- Personnage -->
   <div id="character-wrap">
     <img id="perso-img" src="https://raw.githubusercontent.com/Jeomatique/antarctique/main/perso.png" alt="Guide" crossorigin="anonymous"/>
     <div id="bubble">
       <button id="bubble-close" onclick="closeCharacter()">✕</button>
-      <div id="bubble-text">
-        Bienvenue, explorateur&nbsp;! Je suis votre guide pour ce voyage<br>
-        aux confins du monde. L'Antarctique vous attend —<br>
-        une terre de glace, de silence et de mystère absolu.<br><br>
-        Sélectionnez un explorateur et cliquez sur <strong>Lancer</strong>.
-      </div>
+      <div id="bubble-text">Bienvenue, explorateur&nbsp;! Je suis votre guide pour ce voyage aux confins du monde. L'Antarctique vous attend — une terre de glace et de mystère.<br><br>Sélectionnez un explorateur et cliquez sur <strong>Lancer</strong>.</div>
     </div>
+  </div>
+
+  <!-- Bouton debug -->
+  <button id="debug-toggle" onclick="toggleDebug()">⬛ DEBUG</button>
+  <div id="debug-panel">
+    <div id="dbg-hdr">
+      <b>⬛ DEBUG</b>
+      <button class="dbg-btn" onclick="copyDebugLog()">COPY</button>
+      <button class="dbg-btn red" onclick="clearDbgLog()">CLR</button>
+      <button class="dbg-btn close" onclick="toggleDebug()">✕</button>
+    </div>
+    <div id="dbg-log"></div>
+  </div>
+
+  <!-- Légende (apparaît après fermeture personnage) -->
+  <div id="legend-box">
+    <h4>Légende</h4>
+    <div id="legend-body">
+      <div class="legend-item"><div class="legend-line"></div><span>Sillage du navire</span></div>
+      <div class="legend-item"><div class="legend-dot-blue"></div><span>Point d'information</span></div>
+      <div class="legend-item"><div class="legend-dot-teal"></div><span>Citation historique</span></div>
+    </div>
+    <img id="legend-box-img" style="display:none;max-width:200px;margin-top:8px;border-radius:6px;" src="" alt="Légende"/>
+  </div>
+
+  <!-- Footer bandeau -->
+  <div id="footer-bar">
+    <div id="footer-logos">
+      <a href="https://master-geomatique.org/" target="_blank" rel="noopener">
+        <img src="https://raw.githubusercontent.com/Jeomatique/antarctique/main/master.png" alt="Master" crossorigin="anonymous"/>
+      </a>
+      <a href="https://master-geomatique.org/" target="_blank" rel="noopener">
+        <img src="https://raw.githubusercontent.com/Jeomatique/antarctique/main/cergy.png" alt="Université Cergy" crossorigin="anonymous"/>
+      </a>
+    </div>
+    <div id="footer-credit"><a href="https://google.com" target="_blank" rel="noopener">Crédits</a></div>
   </div>
 </div>
 
@@ -450,318 +438,360 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:'EB
 // =====================================================
 var GH = "https://raw.githubusercontent.com/Jeomatique/antarctique/main/";
 
+// ── EPSG:3031 → WGS84 (Polar Stereographic South) ──
+function proj3031toWGS84(x,y){
+  var a=6378137.0,e=0.0818191908426215,e2=e*e;
+  var sinPc=Math.sin(Math.PI/180*71),cosPc=Math.cos(Math.PI/180*71);
+  var t_c=Math.tan(Math.PI/4-Math.PI/180*71/2)/Math.pow((1-e*sinPc)/(1+e*sinPc),e/2);
+  var m_c=cosPc/Math.sqrt(1-e2*sinPc*sinPc);
+  var rho=Math.sqrt(x*x+y*y);
+  if(rho<1e-6) return{lon:0,lat:-90};
+  var t=rho*t_c/(a*m_c);
+  var chi=Math.PI/2-2*Math.atan(t);
+  var lat=chi+(e2/2+5/24*e2*e2)*Math.sin(2*chi)+(7/48*e2*e2)*Math.sin(4*chi);
+  lat=-lat; // hemisphere sud
+  return{lon:Math.atan2(x,y)*180/Math.PI, lat:lat*180/Math.PI};
+}
+// Auto-détecte CRS via la taille du pixel (pgw.A)
+// abs(A)<1 → degrés (4326), abs(A)>=1 → mètres (3031)
+function pgwPtToWGS84(cx,cy,pixelSizeA){
+  if(Math.abs(pixelSizeA)>=1) return proj3031toWGS84(cx,cy);
+  // 4326: capper lat dans [-90,90]
+  return{lon:cx, lat:Math.max(-90,Math.min(90,cy))};
+}
+
 var EXPLORERS = [
-  { id:'a', geo: GH+'a.geojson', text: GH+'t.geojson', portrait: GH+'a.png' },
-  { id:'b', geo: GH+'b.geojson', text: GH+'tb.geojson', portrait: GH+'b.png' }
+  { id:'urville',  label:'Dumont d\'Urville',
+    geo:GH+'urville.geojson', text:GH+'urville_texte.geojson',
+    portrait:GH+'urville.png',
+    icone:GH+'urville_icone_info.geojson',
+    citation:GH+'urville_citation.geojson' },
+  { id:'charcot',  label:'Jean-Baptiste Charcot',
+    geo:GH+'charcot.geojson', text:GH+'charcot_texte.geojson',
+    portrait:GH+'charcot.png',
+    icone:GH+'charcot_icone_info.geojson',
+    citation:GH+'charcot_citation.geojson' }
 ];
-var activeExplorer = 'a';
+var activeExplorer = 'urville';
 
-var NB_HAUT = 8, NB_BAS = 8;
-var STEP_DURATION_S = 20, TRAIL_MAX_KM = 200, PAUSE_BETWEEN_S = 3;
-var MAX_VISIBLE = 3, HEADING_THRESHOLD = 3, CHAR_RATIO = 0.44;
-// Altitude (mètres) en dessous de laquelle on coupe les ombres
-// pour ne pas noyer l'Antarctique dans le noir
-var SHADOW_DISABLE_ALT = 500000;
+var NB_HAUT=8, NB_BAS=8;
+var STEP_DURATION_S=20, TRAIL_MAX_KM=200, PAUSE_BETWEEN_S=3;
+var MAX_VISIBLE=3, HEADING_THRESHOLD=3, CHAR_RATIO=0.44;
+var SHADOW_DISABLE_ALT=500000;
 
 // =====================================================
-//  MENU HAMBURGER
+//  MENU
 // =====================================================
-window.toggleDrawer = function(){
-  document.getElementById('drawer').classList.toggle('open');
-  document.getElementById('drawer-overlay').classList.toggle('open');
-};
-window.closeDrawer = function(){
-  document.getElementById('drawer').classList.remove('open');
-  document.getElementById('drawer-overlay').classList.remove('open');
-};
+window.toggleDrawer=function(){document.getElementById('drawer').classList.toggle('open');document.getElementById('drawer-overlay').classList.toggle('open');};
+window.closeDrawer=function(){document.getElementById('drawer').classList.remove('open');document.getElementById('drawer-overlay').classList.remove('open');};
 
 // =====================================================
-//  SPLASH — strips défilants (boucle JS fluide)
-//  Technique: translateX décrémenté à chaque frame.
-//  Quand x < -largeurMoitié, on remet à 0 → pas de saut visible
-//  car la strip est dupliquée (contenu identique ×2).
+//  STRIPS SPLASH — boucle JS fluide
 // =====================================================
-(function initStrips(){
-  var topStrip = document.getElementById('strip-top');
-  var botStrip = document.getElementById('strip-bot');
-
-  function makeImg(src){
-    var i=document.createElement('img');
-    i.src=src; i.alt='';
-    i.onerror=function(){this.style.display='none';};
-    return i;
+(function(){
+  var top=document.getElementById('strip-top'),bot=document.getElementById('strip-bot');
+  function img(src){var i=document.createElement('img');i.src=src;i.alt='';i.onerror=function(){this.style.display='none';};return i;}
+  var ts=[],bs=[];
+  for(var i=1;i<=NB_HAUT;i++) ts.push(GH+'haut_'+i+'.jpg');
+  for(var i=1;i<=NB_BAS;i++)  bs.push(GH+'bas_'+i+'.jpg');
+  [].concat(ts,ts,ts).forEach(function(s){top.appendChild(img(s));});
+  [].concat(bs,bs,bs).forEach(function(s){bot.appendChild(img(s));});
+  var xT=0,xB=0,raf;
+  function loop(){
+    raf=requestAnimationFrame(loop);
+    var hw=top.scrollWidth/3;
+    xT-=0.5; xB+=0.5;
+    if(xT<=-hw) xT+=hw;
+    if(xB>=0)   xB=-hw;
+    top.style.transform='translateX('+xT+'px)';
+    bot.style.transform='translateX('+xB+'px)';
   }
-
-  var topSrcs=[], botSrcs=[];
-  for(var i=1;i<=NB_HAUT;i++) topSrcs.push(GH+'haut_'+i+'.jpg');
-  for(var i=1;i<=NB_BAS;i++)  botSrcs.push(GH+'bas_'+i+'.jpg');
-
-  // Dupliquer ×3 pour que le conteneur soit assez large même si certaines images manquent
-  [].concat(topSrcs,topSrcs,topSrcs).forEach(function(s){topStrip.appendChild(makeImg(s));});
-  [].concat(botSrcs,botSrcs,botSrcs).forEach(function(s){botStrip.appendChild(makeImg(s));});
-
-  var xTop=0, xBot=0, speed=0.5; // px par frame
-  var rafStrip;
-
-  function animStrip(){
-    rafStrip = requestAnimationFrame(animStrip);
-    var hw = topStrip.scrollWidth / 3; // largeur d'une répétition
-    xTop -= speed;
-    xBot += speed;
-    // Boucle fluide : téléportation invisible car contenu identique en dessous
-    if(xTop <= -hw) xTop += hw;
-    if(xBot >= 0)   xBot  = -hw;
-    topStrip.style.transform = 'translateX('+xTop+'px)';
-    botStrip.style.transform = 'translateX('+xBot+'px)';
-  }
-
-  // Démarrer quand les images sont un peu chargées
-  botStrip.style.transform = 'translateX(-' + (100/3) + '%)';
-  rafStrip = requestAnimationFrame(animStrip);
-  window._stopStrips = function(){ cancelAnimationFrame(rafStrip); };
+  bot.style.transform='translateX(-33.33%)';
+  raf=requestAnimationFrame(loop);
+  window._stopStrips=function(){cancelAnimationFrame(raf);};
 })();
 
 // =====================================================
 //  TRANSITION
 // =====================================================
-var transitionStarted = false;
-
-window.startTransition = function(){
-  if(transitionStarted) return;
-  transitionStarted = true;
-  var splash    = document.getElementById('splash');
-  var ribbon    = document.getElementById('ribbon');
-  var ribbonApp = document.getElementById('ribbon-app');
-  var app       = document.getElementById('app');
-
-  app.style.display = 'block';
+var transitionStarted=false;
+window.startTransition=function(){
+  if(transitionStarted)return;
+  transitionStarted=true;
+  document.getElementById('app').style.display='block';
   loadArcGIS();
-
-  // Fermer le ruban
+  setTimeout(function(){document.getElementById('ribbon').classList.add('closing');},150);
   setTimeout(function(){
-    ribbon.classList.add('closing');
-  }, 150);
-
-  // Disparition du splash, apparition de la citation
-  setTimeout(function(){
-    splash.style.transition='opacity 0.5s ease';
-    splash.style.opacity='0';
-    setTimeout(function(){ splash.style.display='none'; if(window._stopStrips) window._stopStrips(); }, 500);
-
-    ribbonApp.style.transform='translateY(-50%) scaleY(0)';
-    ribbonApp.style.opacity='0';
-    setTimeout(function(){
-      ribbonApp.style.transition='transform 0.6s cubic-bezier(.18,.77,0,1),opacity 0.5s ease';
-      ribbonApp.style.transform='translateY(-50%) scaleY(1)';
-      ribbonApp.style.opacity='1';
-    }, 100);
-  }, 900);
-
-  // Lever le voile à 5s
+    var s=document.getElementById('splash');
+    s.style.transition='opacity .5s ease';s.style.opacity='0';
+    setTimeout(function(){s.style.display='none';if(window._stopStrips)window._stopStrips();},500);
+    var ra=document.getElementById('ribbon-app');
+    ra.style.transform='translateY(-50%) scaleY(0)';ra.style.opacity='0';
+    setTimeout(function(){ra.style.transition='transform .6s cubic-bezier(.18,.77,0,1),opacity .5s';ra.style.transform='translateY(-50%) scaleY(1)';ra.style.opacity='1';},100);
+  },900);
+  // Lever voile à 8s
   setTimeout(function(){
     document.getElementById('veil').classList.add('lifted');
-    ribbonApp.style.transition='opacity 1s ease';
-    ribbonApp.style.opacity='0';
-    setTimeout(function(){ ribbonApp.classList.add('hidden-ribbon'); }, 1000);
+    var ra=document.getElementById('ribbon-app');
+    ra.style.transition='opacity 1s ease';ra.style.opacity='0';
+    setTimeout(function(){ra.classList.add('hidden-ribbon');},1000);
     setTimeout(function(){
       document.getElementById('bottom-ui').classList.add('visible');
       document.getElementById('basemap-btn').classList.add('visible');
+      document.getElementById('footer-bar').classList.add('visible');
       document.getElementById('character-wrap').classList.add('visible');
-    }, 800);
-  }, 5000);
+    },800);
+  },8000);
 };
 
 // =====================================================
-//  CHARGEMENT ARCGIS DYNAMIQUE
+//  BANNIÈRE NOM EXPLORATEUR
 // =====================================================
-var arcgisLoaded = false;
-function loadArcGIS(){
-  if(arcgisLoaded) return;
-  arcgisLoaded = true;
-  var lnk=document.createElement('link');
-  lnk.rel='stylesheet'; lnk.href='https://js.arcgis.com/4.30/esri/themes/dark/main.css';
-  document.head.appendChild(lnk);
-  var sc=document.createElement('script');
-  sc.src='https://js.arcgis.com/4.30/';
-  sc.onload=function(){ initApp(); };
-  document.head.appendChild(sc);
+function showExplorerBanner(label){
+  var b=document.getElementById('explorer-banner');
+  var t=document.getElementById('explorer-banner-text');
+  t.textContent=label;
+  b.classList.add('show');
+  setTimeout(function(){
+    b.classList.remove('show');
+  },2000);
 }
 
 // =====================================================
-//  APP PRINCIPALE
+//  THEMES (cercles)
+// =====================================================
+window.selectTheme=function(id,el){
+  document.querySelectorAll('.theme-circle').forEach(function(c){c.classList.remove('active');});
+  el.classList.add('active');
+  // Logique thème à implémenter
+};
+
+// =====================================================
+//  CHARGEMENT ARCGIS
+// =====================================================
+var arcgisLoaded=false;
+function loadArcGIS(){
+  if(arcgisLoaded)return; arcgisLoaded=true;
+  var l=document.createElement('link');l.rel='stylesheet';l.href='https://js.arcgis.com/4.30/esri/themes/dark/main.css';document.head.appendChild(l);
+  var s=document.createElement('script');s.src='https://js.arcgis.com/4.30/';s.onload=function(){initApp();};document.head.appendChild(s);
+}
+
+// =====================================================
+//  APP
 // =====================================================
 function initApp(){
   require([
     "esri/config","esri/Map","esri/views/SceneView",
     "esri/Graphic","esri/layers/GraphicsLayer",
     "esri/geometry/Point","esri/geometry/Polyline",
-    "esri/layers/WebTileLayer","esri/Basemap"
-  ], function(esriConfig,Map,SceneView,Graphic,GraphicsLayer,Point,Polyline,WebTileLayer,Basemap){
+    "esri/layers/WebTileLayer","esri/Basemap",
+  ],function(esriConfig,Map,SceneView,Graphic,GraphicsLayer,Point,Polyline,WebTileLayer,Basemap){
 
-    var map = new Map({ basemap:"satellite", ground:"world-elevation" });
+    // ── Carte LÉGÈRE par défaut (vectorielle, pas d'images raster) ──
+    var map=new Map({basemap:"dark-gray-vector",ground:"world-elevation"});
 
     // Basemap switcher
     var BASEMAPS={
+      dark:function(){return"dark-gray-vector";},
       satellite:function(){return"satellite";},
-      watercolor:function(){return new Basemap({baseLayers:[new WebTileLayer({urlTemplate:"https://tiles.stadiamaps.com/tiles/stamen_watercolor/{level}/{col}/{row}.jpg"})],title:"Watercolor"});},
-      physical:function(){return new Basemap({baseLayers:[new WebTileLayer({urlTemplate:"https://server.arcgisonline.com/ArcGIS/rest/services/World_Physical_Map/MapServer/tile/{level}/{row}/{col}"})],title:"Physical"});}
+      physical:function(){return new Basemap({baseLayers:[new WebTileLayer({urlTemplate:"https://server.arcgisonline.com/ArcGIS/rest/services/World_Physical_Map/MapServer/tile/{level}/{row}/{col}",copyright:"Esri"})],title:"Physical"});}
     };
     var bmOpen=false;
     window.toggleBasemapPanel=function(){bmOpen=!bmOpen;document.getElementById('basemap-panel').classList.toggle('open',bmOpen);};
-    document.addEventListener('click',function(e){if(!e.target.closest('#basemap-btn')&&!e.target.closest('#basemap-panel')){bmOpen=false;document.getElementById('basemap-panel').classList.remove('open');}});
+    document.addEventListener('click',function(e){if(!e.target.closest('#basemap-btn')&&!e.target.closest('#basemap-panel')&&!e.target.closest('.theme-circle')&&!e.target.closest('.explorer-portrait')){bmOpen=false;document.getElementById('basemap-panel').classList.remove('open');}});
     window.setBasemap=function(k,c){map.basemap=BASEMAPS[k]();document.querySelectorAll('.bm-card').forEach(function(x){x.classList.remove('active');});c.classList.add('active');bmOpen=false;document.getElementById('basemap-panel').classList.remove('open');};
 
-    // SceneView
-    // Date décembre → soleil sur hémisphère SUD → Antarctique éclairé
-    var view = new SceneView({
-      container:"viewDiv", map:map,
-      camera:{position:[0,-70,3000000],tilt:20},
+    // SceneView — date décembre → soleil hémisphère sud
+    var view=new SceneView({
+      container:"viewDiv",map:map,
+      camera:{position:[0,-75,4000000],tilt:15},
       qualityProfile:"high",
       environment:{
         atmosphere:{quality:"high"},
         lighting:{
-          date: new Date("2024-12-21T12:00:00"),  // solstice d'été austral
-          directShadowsEnabled: false              // off par défaut, on gère via watch
+          date:new Date("2024-12-21T14:00:00Z"),
+          directShadowsEnabled:false,
+          cameraTrackingEnabled:false  // lumière fixe, pas liée à la caméra
         }
       }
     });
 
-    // Gestion ombres selon altitude : désactiver sous SHADOW_DISABLE_ALT
-    // pour éviter que l'Antarctique soit dans le noir au zoom proche
-    view.watch("camera", function(cam){
-      var alt = cam.position.z;
-      var shadersOn = alt > SHADOW_DISABLE_ALT;
-      if(view.environment.lighting.directShadowsEnabled !== shadersOn){
-        view.environment = {
-          atmosphere: view.environment.atmosphere,
-          lighting: {
-            date: view.environment.lighting.date,
-            directShadowsEnabled: shadersOn
-          }
-        };
+    // Ombres selon altitude
+    view.watch("camera",function(cam){
+      var on=cam.position.z>SHADOW_DISABLE_ALT;
+      if(view.environment.lighting.directShadowsEnabled!==on){
+        view.environment={atmosphere:view.environment.atmosphere,lighting:{date:view.environment.lighting.date,directShadowsEnabled:on,cameraTrackingEnabled:false}};
       }
     });
 
-    // Layers
-    var trailLayer = new GraphicsLayer({elevationInfo:{mode:"on-the-ground"}});
-    var textLayer  = new GraphicsLayer({elevationInfo:{mode:"absolute-height"}});
-    var boatLayer  = new GraphicsLayer({elevationInfo:{mode:"absolute-height"}});
-    map.addMany([trailLayer, textLayer, boatLayer]);
+    // Layers : textLayer et iconeLayer AVANT boatLayer → bateau cache tout
+    var trailLayer=new GraphicsLayer({elevationInfo:{mode:"on-the-ground"}});
+    var textLayer =new GraphicsLayer({elevationInfo:{mode:"absolute-height"}});
+    var iconeLayer=new GraphicsLayer({elevationInfo:{mode:"absolute-height"}});
+    var citLayer  =new GraphicsLayer({elevationInfo:{mode:"absolute-height"}});
+    var boatLayer =new GraphicsLayer({elevationInfo:{mode:"absolute-height"}});
+    map.addMany([trailLayer,textLayer,iconeLayer,citLayer,boatLayer]);
 
-    // ── Géométrie ──────────────────────────────────
-    function hav(a,b){
-      var R=6371,r=Math.PI/180,dLat=(b.lat-a.lat)*r,dLon=(b.lon-a.lon)*r;
-      var s=Math.sin(dLat/2)*Math.sin(dLat/2)+Math.cos(a.lat*r)*Math.cos(b.lat*r)*Math.sin(dLon/2)*Math.sin(dLon/2);
-      return R*2*Math.atan2(Math.sqrt(s),Math.sqrt(1-s));
-    }
+    // ── Géométrie ───────────────────────────────
+    function hav(a,b){var R=6371,r=Math.PI/180,dLat=(b.lat-a.lat)*r,dLon=(b.lon-a.lon)*r;var s=Math.sin(dLat/2)*Math.sin(dLat/2)+Math.cos(a.lat*r)*Math.cos(b.lat*r)*Math.sin(dLon/2)*Math.sin(dLon/2);return R*2*Math.atan2(Math.sqrt(s),Math.sqrt(1-s));}
     function havA(a,b){return hav({lon:a[0],lat:a[1]},{lon:b[0],lat:b[1]});}
-    function brng(a,b){
-      var r=Math.PI/180,dLon=(b.lon-a.lon)*r;
-      var y=Math.sin(dLon)*Math.cos(b.lat*r);
-      var x=Math.cos(a.lat*r)*Math.sin(b.lat*r)-Math.sin(a.lat*r)*Math.cos(b.lat*r)*Math.cos(dLon);
-      return((Math.atan2(y,x)*180/Math.PI)+360)%360;
-    }
-    function midpointOfLine(coords){
-      var cd=[0];
-      for(var i=0;i<coords.length-1;i++) cd.push(cd[cd.length-1]+havA(coords[i],coords[i+1]));
-      var mid=cd[cd.length-1]/2,mLon=coords[0][0],mLat=coords[0][1];
-      for(var i=0;i<coords.length-1;i++){
-        if(cd[i]<=mid&&cd[i+1]>=mid){
-          var t=(mid-cd[i])/(cd[i+1]-cd[i]);
-          mLon=coords[i][0]+(coords[i+1][0]-coords[i][0])*t;
-          mLat=coords[i][1]+(coords[i+1][1]-coords[i][1])*t;
-          break;
-        }
-      }
-      return{lon:mLon,lat:mLat,totalKm:cd[cd.length-1]};
-    }
+    function brng(a,b){var r=Math.PI/180,dLon=(b.lon-a.lon)*r;var y=Math.sin(dLon)*Math.cos(b.lat*r);var x=Math.cos(a.lat*r)*Math.sin(b.lat*r)-Math.sin(a.lat*r)*Math.cos(b.lat*r)*Math.cos(dLon);return((Math.atan2(y,x)*180/Math.PI)+360)%360;}
+    function midOf(coords){var cd=[0];for(var i=0;i<coords.length-1;i++)cd.push(cd[cd.length-1]+havA(coords[i],coords[i+1]));var mid=cd[cd.length-1]/2,mLon=coords[0][0],mLat=coords[0][1];for(var i=0;i<coords.length-1;i++){if(cd[i]<=mid&&cd[i+1]>=mid){var t=(mid-cd[i])/(cd[i+1]-cd[i]);mLon=coords[i][0]+(coords[i+1][0]-coords[i][0])*t;mLat=coords[i][1]+(coords[i+1][1]-coords[i][1])*t;break;}}return{lon:mLon,lat:mLat,totalKm:cd[cd.length-1]};}
+    function closestDistOnStage(st,lon,lat){var minD=Infinity,minI=0;for(var i=0;i<st.coords.length;i++){var d=havA(st.coords[i],[lon,lat]);if(d<minD){minD=d;minI=i;}}return st.cumDist[minI];}
 
-    // ── Données (rechargeables selon explorateur) ──
-    var stages=[], stagesReady=false;
-    var textLabels=[], labelStates={}, textGfxMap={};
-    var boatGfx=null, lastHead=null, lastBH=null;
-    var trailPts=[], trailLineGfx=null;
-    var EMPTY_PATH=[[[0,0],[0.00001,0]]];
+    // ── État global ─────────────────────────────
+    var stages=[],stagesReady=false;
+    var cameraStages=[];   // trajectoires caméra par étape
+    var textLabels=[],labelStates={},textGfxMap={};
+    var iconeFeats=[],iconeGfxMap={};
+    var citFeats=[],citGfxMap={};
+    var boatGfx=null,lastHead=null,lastBH=null;
+    var trailPts=[],trailLineGfx=null,trailBoatT=800;
+    var EMPTY=[[[0,0],[0.00001,0]]];
     var currentStage=0,isPlaying=false,distCovered=0,prevDist=0;
     var lastTs=null,animRafId=null,pauseTimer=null;
+    var currentStageEtape=1;
 
-    function loadExplorer(explorerObj){
-      // Arrêter l'animation en cours
-      cancelAnimationFrame(animRafId); clearTimeout(pauseTimer);
-      isPlaying=false; distCovered=0; prevDist=0; lastTs=null;
-
-      // Vider les layers
-      trailLayer.removeAll(); textLayer.removeAll(); boatLayer.removeAll();
-      trailPts=[]; trailLineGfx=null; boatGfx=null; lastHead=null; lastBH=null;
-      textLabels=[]; labelStates={}; textGfxMap={};
-      stages=[]; stagesReady=false;
-
-      // Reset UI
+    // ── Chargement explorateur ──────────────────
+    function loadExplorer(exp){
+      cancelAnimationFrame(animRafId);clearTimeout(pauseTimer);
+      isPlaying=false;distCovered=0;prevDist=0;lastTs=null;
+      trailLayer.removeAll();textLayer.removeAll();iconeLayer.removeAll();
+      citLayer.removeAll();boatLayer.removeAll();
+      // Vider les couches thématiques (Final/Fonte)
+      themeTrailLayer.removeAll();
+      if(window._themeMeshLayer) window._themeMeshLayer.removeAll();
+      window._themeImages=[];
+      // Effacer le canvas citation (nettoyage visuel immédiat)
+      if(citCanvas&&citCtx) citCtx.clearRect(0,0,citCanvas.width,citCanvas.height);
+      trailPts=[];trailLineGfx=null;boatGfx=null;lastHead=null;lastBH=null;
+      textLabels=[];labelStates={};textGfxMap={};
+      iconeFeats=[];iconeGfxMap={}; // everSeen sera false par défaut (propriété non définie);citFeats=[];citGfxMap={};
+      stages=[];stagesReady=false;
       document.getElementById('btnPlay').textContent='▶ Lancer';
       document.querySelectorAll('.stage-rect').forEach(function(r){r.classList.remove('active','done');r.querySelector('.stage-progress').style.width='0%';});
+      closeInfoPopup();
 
-      var geoP = fetch(explorerObj.geo).then(function(r){if(!r.ok)throw r.status;return r.json();}).catch(function(){return makeDemoA();});
-      var txtP = fetch(explorerObj.text).then(function(r){if(!r.ok)throw r.status;return r.json();}).catch(function(){return null;});
+      var gP=fetch(exp.geo).then(function(r){if(!r.ok)throw r.status;return r.json();}).catch(function(){return makeDemoA();});
+      var tP=fetch(exp.text).then(function(r){if(!r.ok)throw r.status;return r.json();}).catch(function(){return null;});
+      var iP=fetch(exp.icone).then(function(r){if(!r.ok)throw r.status;return r.json();}).catch(function(){return null;});
+      var cP=fetch(exp.citation).then(function(r){if(!r.ok)throw r.status;return r.json();}).catch(function(){return null;});
+      var camUrl=GH+exp.id+'_cameraboat.geojson';
+      var camP=fetch(camUrl).then(function(r){if(!r.ok)throw r.status;return r.json();}).catch(function(){return null;});
 
-      Promise.all([geoP,txtP]).then(function(res){
-        var aGeo=res[0], tGeo=res[1];
-
-        // Étapes
-        var byE={},btE={};
-        aGeo.features.forEach(function(f){
-          var e=f.properties.etape,bt=f.properties.boat_t||800;
-          if(!byE[e]){byE[e]=[];btE[e]=bt;}
-          var g=f.geometry;
-          if(g.type==='LineString') byE[e]=byE[e].concat(g.coordinates);
-          else if(g.type==='MultiLineString') g.coordinates.forEach(function(p){byE[e]=byE[e].concat(p);});
-        });
-        stages=Object.keys(byE).map(Number).sort(function(a,b){return a-b;}).map(function(num){
-          var raw=byE[num],bt=btE[num]||800,cd=[0];
-          for(var i=0;i<raw.length-1;i++) cd.push(cd[cd.length-1]+havA(raw[i],raw[i+1]));
-          return{etape:num,coords:raw,cumDist:cd,totalDist:cd[cd.length-1],boatHeight:bt,boatZ:bt/100*42};
-        });
-
-        // Labels
-        if(tGeo){
-          tGeo.features.forEach(function(f){
-            var text=f.properties.text||f.properties.texte||'';
-            var taille=f.properties.taille_m||5000;
-            var etape=f.properties.etape||1;
-            if(!text) return;
-            var g=f.geometry;
-            var coords=g.type==='LineString'?g.coordinates:g.coordinates.reduce(function(a,b){return a.concat(b);});
-            if(coords.length<2) return;
-            var mp=midpointOfLine(coords);
-            var st=null;
-            for(var si=0;si<stages.length;si++){if(stages[si].etape===etape){st=stages[si];break;}}
-            var distStart=0;
-            if(st){var minD=Infinity;for(var i=0;i<st.coords.length;i++){var d=havA(st.coords[i],[mp.lon,mp.lat]);if(d<minD){minD=d;distStart=st.cumDist[i];}}}
-            var speed=st?st.totalDist/STEP_DURATION_S:1;
-            var wordKm=text.length*CHAR_RATIO*taille/1000;
-            var fadeDur=Math.max(0.3,Math.min(8,wordKm/speed/2));
-            var fadeEnd=distStart+fadeDur*speed;
-            var lbl={text:text,taille_m:taille,etape:etape,midLon:mp.lon,midLat:mp.lat,fadeStartKm:distStart,fadeEndKm:fadeEnd,opacity:0};
-            textLabels.push(lbl);
-            labelStates[text]={opacity:0,fadeStartKm:distStart,fadeEndKm:fadeEnd,etape:etape};
-          });
-        }
-
+      Promise.all([gP,tP,iP,cP,camP]).then(function(res){
+        buildStages(res[0]);
+        if(res[1]) buildTextLabels(res[1]);
+        if(res[2]) buildIconeFeats(res[2]);
+        if(res[3]) buildCitFeats(res[3]);
+        if(res[4]) buildCameraStages(res[4]); else cameraStages=[];
         stagesReady=true;
         initTextGfx();
         buildUI();
         initScene();
+        updateLegendForExplorer(); // MAJ légende selon explorateur actif
       });
     }
 
-    // ── Textes ─────────────────────────────────────
+    // ── Construction étapes ─────────────────────
+    function buildStages(aGeo){
+      var byE={},btE={},tpsE={};
+      aGeo.features.forEach(function(f){
+        var e=f.properties.etape,bt=f.properties.boat_t||800;
+        var tps=f.properties.temps||null; // durée en secondes
+        if(!byE[e]){byE[e]=[];btE[e]=bt;tpsE[e]=tps;}
+        var g=f.geometry;
+        if(g.type==='LineString') byE[e]=byE[e].concat(g.coordinates);
+        else if(g.type==='MultiLineString') g.coordinates.forEach(function(p){byE[e]=byE[e].concat(p);});
+      });
+      stages=Object.keys(byE).map(Number).sort(function(a,b){return a-b;}).map(function(num){
+        var raw=byE[num],bt=btE[num]||800,cd=[0];
+        var duree=tpsE[num]||STEP_DURATION_S; // utiliser "temps" si disponible
+        for(var i=0;i<raw.length-1;i++) cd.push(cd[cd.length-1]+havA(raw[i],raw[i+1]));
+        return{etape:num,coords:raw,cumDist:cd,totalDist:cd[cd.length-1],
+               boatHeight:bt,boatZ:bt/100*42,duree:duree};
+      });
+    }
+
+    // ── Textes (avec champ 'classe') ────────────
+    // ── Trajectoire caméra ──────────────────────────
+    function buildCameraStages(camGeo){
+      var byE={},zoomE={};
+      camGeo.features.forEach(function(f){
+        var e=f.properties.etape||1;
+        var z=f.properties.zoom||2000000; // altitude max (mètres)
+        if(!byE[e]){byE[e]=[];zoomE[e]=z;}
+        var g=f.geometry;
+        var coords=g.type==='LineString'?g.coordinates:g.coordinates.reduce(function(a,b){return a.concat(b);});
+        byE[e]=byE[e].concat(coords);
+      });
+      cameraStages=Object.keys(byE).map(Number).sort(function(a,b){return a-b;}).map(function(num){
+        var raw=byE[num],cd=[0];
+        for(var i=0;i<raw.length-1;i++) cd.push(cd[cd.length-1]+havA(raw[i],raw[i+1]));
+        return{etape:num,coords:raw,cumDist:cd,totalDist:cd[cd.length-1],maxAlt:zoomE[num]||2000000};
+      });
+      dlog('ok','Camera stages: '+cameraStages.length);
+    }
+
+    function getCameraStage(etape){
+      for(var i=0;i<cameraStages.length;i++) if(cameraStages[i].etape===etape) return cameraStages[i];
+      return null;
+    }
+
+    function buildTextLabels(tGeo){
+      tGeo.features.forEach(function(f){
+        var text=f.properties.text||f.properties.texte||'';
+        var taille=f.properties.taille_m||5000;
+        var etape=f.properties.etape||1;
+        var classe=f.properties.classe||'default';
+        if(!text)return;
+        var g=f.geometry;
+        var coords=g.type==='LineString'?g.coordinates:g.coordinates.reduce(function(a,b){return a.concat(b);});
+        if(coords.length<2)return;
+        var mp=midOf(coords);
+        var st=stageByEtape(etape);
+        var distStart=0;
+        if(st){var minD=Infinity;for(var i=0;i<st.coords.length;i++){var d=havA(st.coords[i],[mp.lon,mp.lat]);if(d<minD){minD=d;distStart=st.cumDist[i];}}}
+        var speed=st?st.totalDist/STEP_DURATION_S:1;
+        var wordKm=text.length*CHAR_RATIO*taille/1000;
+        var distMid=distStart; // distance dans l'étape au milieu de l'entité
+        var fadeDur=2.0; // 2s fixe
+        var lbl={text:text,taille_m:taille,etape:etape,classe:classe,midLon:mp.lon,midLat:mp.lat,fadeStartKm:distMid,fadeEndKm:distMid+fadeDur*speed,opacity:0};
+        textLabels.push(lbl);
+        labelStates[text]={opacity:0,fadeStartKm:distMid,fadeEndKm:distMid+fadeDur*speed,etape:etape};
+      });
+    }
+
+    // ── Icônes info ─────────────────────────────
+    function buildIconeFeats(iGeo){
+      iGeo.features.forEach(function(f){
+        var etape=f.properties.etape||1;
+        var texte=f.properties.texte||'';
+        var g=f.geometry;
+        if(g.type!=='Point') return;
+        var lon=g.coordinates[0], lat=g.coordinates[1];
+        iconeFeats.push({lon:lon,lat:lat,etape:etape,texte:texte,visible:false,gfxArr:[]});
+      });
+    }
+
+    // ── Citations ────────────────────────────────
+    function buildCitFeats(cGeo){
+      cGeo.features.forEach(function(f){
+        var etape=f.properties.etape||1;
+        var texte=f.properties.texte||'';
+        var g=f.geometry;
+        if(g.type!=='Point')return;
+        var lon=g.coordinates[0],lat=g.coordinates[1];
+        citFeats.push({lon:lon,lat:lat,etape:etape,texte:texte,visible:false,typed:false});
+      });
+    }
+
+    // ── Textes 3D ───────────────────────────────
     function textSizePt(tm){return Math.round(12+8*Math.log10(Math.max(1,tm/100)));}
     function buildTextGfx(lbl,opacity){
       var sz=textSizePt(lbl.taille_m),hal=Math.max(1,Math.round(sz*0.10));
       var a=Math.round(Math.min(1,Math.max(0,opacity))*255);
-      return new Graphic({
-        geometry:new Point({longitude:lbl.midLon,latitude:lbl.midLat,z:1,spatialReference:{wkid:4326}}),
-        symbol:{type:"point-3d",symbolLayers:[{type:"text",text:lbl.text,size:sz,font:{family:"High Tower Text, serif",weight:"normal"},material:{color:[255,255,255,a]},halo:{color:[30,30,30,Math.round(Math.min(1,opacity)*220)],size:hal}}]}
-      });
+      return new Graphic({geometry:new Point({longitude:lbl.midLon,latitude:lbl.midLat,z:1,spatialReference:{wkid:4326}}),symbol:{type:"point-3d",symbolLayers:[{type:"text",text:lbl.text,size:sz,font:{family:"High Tower Text, serif",weight:"normal"},material:{color:[255,255,255,a]},halo:{color:[30,30,30,Math.round(Math.min(1,opacity)*220)],size:hal}}]}});
     }
     function updateTextLabel(lbl,opacity){var o=textGfxMap[lbl.text];if(o)textLayer.remove(o);var g=buildTextGfx(lbl,opacity);textGfxMap[lbl.text]=g;textLayer.add(g);}
     function initTextGfx(){textLabels.forEach(function(lbl){var g=buildTextGfx(lbl,0);textGfxMap[lbl.text]=g;textLayer.add(g);});}
@@ -775,59 +805,289 @@ function initApp(){
     }
     function resetLabels(etape){textLabels.forEach(function(lbl){var st=labelStates[lbl.text];if(st&&st.etape===etape&&st.opacity!==0){st.opacity=0;updateTextLabel(lbl,0);}});}
 
-    // ── Bateau ─────────────────────────────────────
+    // ── Icônes info : affichage 3D ───────────────
+    // Cercles pulsants + tige verticale + cercle bleu avec (i)
+    var iconeAnimFrame=null, iconeAnimT=0;
+
+    // Construire un cercle géodésique autour d'un point (lat/lon en degrés, rayon en km)
+    // Retourne une Polygon geometry en WGS84
+    function buildCircleGeom(lon,lat,radiusKm){
+      var R=6371, dR=radiusKm/R;
+      var latR=lat*Math.PI/180, lonR=lon*Math.PI/180;
+      var pts=[];
+      for(var i=0;i<=64;i++){
+        var az=i*2*Math.PI/64;
+        var latP=Math.asin(Math.sin(latR)*Math.cos(dR)+Math.cos(latR)*Math.sin(dR)*Math.cos(az));
+        var lonP=lonR+Math.atan2(Math.sin(az)*Math.sin(dR)*Math.cos(latR),Math.cos(dR)-Math.sin(latR)*Math.sin(latP));
+        pts.push([lonP*180/Math.PI, latP*180/Math.PI]);
+      }
+      return {type:'polygon',rings:[pts],spatialReference:{wkid:4326}};
+    }
+
+    function buildIconeGfx(feat){
+      feat.gfxArr.forEach(function(g){iconeLayer.remove(g);});
+      feat.gfxArr=[];
+      if(!feat.visible) return;
+
+      // ── Tige verticale noire sol→20km ──────────────────
+      var stem=new Graphic({
+        geometry:new Polyline({
+          paths:[[[feat.lon,feat.lat,0],[feat.lon,feat.lat,20000]]],
+          hasZ:true,spatialReference:{wkid:4326}
+        }),
+        symbol:{type:"line-3d",symbolLayers:[{type:"line",size:4,material:{color:[0,0,0,0.9]}}]}
+      });
+      iconeLayer.add(stem);feat.gfxArr.push(stem);
+
+      // ── Cercle bleu + (i) centré — UN seul graphic, deux symbolLayers ──
+      var marker=new Graphic({
+        geometry:new Point({longitude:feat.lon,latitude:feat.lat,z:20000,spatialReference:{wkid:4326}}),
+        symbol:{
+          type:"point-3d",
+          symbolLayers:[
+            {type:"icon",size:34,resource:{primitive:"circle"},
+             material:{color:[180,220,255,0.88]},
+             outline:{color:[40,100,200,1],size:2.5}},
+            {type:"text",text:"i",size:16,
+             font:{family:"Times New Roman",weight:"bold",style:"italic"},
+             material:{color:[255,255,255,1]},
+             verticalAlignment:"middle",horizontalAlignment:"center"}
+          ]
+        }
+      });
+      marker._infoFeat=feat;
+      iconeLayer.add(marker);feat.gfxArr.push(marker);
+
+      // ── 3 cercles pulsants SUR LE GLOBE (polygones 3D) ──
+      // Rayon max = 40km → se répercute sur la courbure du globe
+      for(var ci=0;ci<3;ci++){
+        var pulse=new Graphic({
+          geometry:buildCircleGeom(feat.lon,feat.lat,1),  // rayon 1km initial
+          symbol:{type:"polygon-3d",symbolLayers:[{
+            type:"line",
+            material:{color:[100,180,255,0.7]},
+            size:2
+          }]}
+        });
+        pulse._phase=ci/3;
+        pulse._centerLon=feat.lon;
+        pulse._centerLat=feat.lat;
+        iconeLayer.add(pulse);feat.gfxArr.push(pulse);
+      }
+    }
+
+    // Animation des cercles pulsants
+    function animIcones(){
+      iconeAnimFrame=requestAnimationFrame(animIcones);
+      iconeAnimT+=0.016;
+      iconeFeats.forEach(function(feat){
+        if(!feat.visible||feat.gfxArr.length<3) return;
+        // gfxArr: [0]=stem, [1]=marker(+i), [2..4]=cercles polygone sur le globe
+        for(var ci=0;ci<3;ci++){
+          var g=feat.gfxArr[2+ci];
+          if(!g||g._phase===undefined) continue;
+          var phase=(iconeAnimT*0.45+g._phase)%1;
+          var radiusKm=0.5+phase*40; // 0.5km → 40km max
+          var alpha=(1-phase)*0.8;
+          // Mettre à jour la geometry (cercle géodésique)
+          g.geometry=buildCircleGeom(g._centerLon,g._centerLat,radiusKm);
+          // Mettre à jour l'opacité via symbol
+          var sym=g.symbol.clone();
+          sym.symbolLayers.items[0].material={color:[100,180,255,alpha]};
+          g.symbol=sym;
+        }
+      });
+    }
+    animIcones();
+
+    // Clic sur icone → popup
+    view.on("click",function(evt){
+      view.hitTest(evt).then(function(res){
+        var g=res.results&&res.results[0]&&res.results[0].graphic;
+        if(g&&g._infoFeat){
+          openInfoPopup(g._infoFeat.texte);
+        }
+      });
+    });
+
+    window.closeInfoPopup=function(){document.getElementById('info-popup').classList.remove('open');};
+    function openInfoPopup(texte){
+      var raw=(texte||'').split('\\n').join('<br>').split('\n').join('<br>');
+      document.getElementById('info-popup-text').innerHTML=raw;
+      document.getElementById('info-popup').classList.add('open');
+    }
+
+    // Mise à jour visibilité icones selon étape ET proximité (<40km)
+    // Une fois visible, l'icone RESTE visible pour le reste de l'étape
+    function updateIcones(etape,boatLon,boatLat){
+      iconeFeats.forEach(function(feat){
+        var inEtape=(feat.etape===etape);
+        if(!inEtape){
+          // Hors étape: cacher et réinitialiser le flag
+          if(feat.visible){ feat.visible=false; feat.everSeen=false; buildIconeGfx(feat); }
+          return;
+        }
+        // Dans l'étape: visible si déjà vu OU si maintenant à moins de 40km
+        if(!feat.everSeen && boatLon!=null){
+          var dist=hav({lon:boatLon,lat:boatLat},{lon:feat.lon,lat:feat.lat});
+          if(dist<=40) feat.everSeen=true;
+        }
+        var shouldBeVisible=inEtape && feat.everSeen;
+        if(shouldBeVisible!==feat.visible){
+          feat.visible=shouldBeVisible;
+          buildIconeGfx(feat);
+        }
+      });
+    }
+
+    // ── Citations ───────────────────────────────
+
+    // ── Canvas pour citations fixées au point géo ──────
+    var citCanvas=null,citCtx=null;
+    function initCitCanvas(){
+      citCanvas=document.getElementById('cit-canvas');
+      citCtx=citCanvas.getContext('2d');
+      citCanvas.width=window.innerWidth; citCanvas.height=window.innerHeight;
+      window.addEventListener('resize',function(){citCanvas.width=window.innerWidth;citCanvas.height=window.innerHeight;drawAllCitations();});
+      // RAF permanent pour suivre la caméra
+      (function citLoop(){requestAnimationFrame(citLoop);drawAllCitations();})();
+    }
+
+    function drawAllCitations(){
+      if(!citCanvas||!citCtx) return;
+      citCtx.clearRect(0,0,citCanvas.width,citCanvas.height);
+      citFeats.forEach(function(feat){
+        if(!feat.visible||!feat.texte) return;
+        // Convertir le point géo en pixel écran
+        var pt=new Point({longitude:feat.lon,latitude:feat.lat,spatialReference:{wkid:4326}});
+        var scr=view.toScreen(pt);
+        if(!scr) return;
+        var sx=scr.x, sy=scr.y;
+        // Séparer sur \n littéral (deux chars) ET vrais sauts de ligne
+      var raw=(feat.texte||'').replace(/\\n/g,'\n');
+      var lines=raw.split('\n');
+        var fontSize=15, lineH=22, padX=18, padY=12;
+        // Mesurer largeur max
+        citCtx.font='italic '+fontSize+'px "EB Garamond",serif';
+        var maxW=0;
+        lines.forEach(function(l){var w=citCtx.measureText(l).width;if(w>maxW)maxW=w;});
+        var bW=maxW+padX*2, bH=lines.length*lineH+padY*2;
+        // Positionner la bulle au-dessus du point
+        var bx=sx-bW/2, by=sy-bH-20;
+        // Fond arrondi gris 60%
+        citCtx.save();
+        citCtx.globalAlpha=0.92;
+        citCtx.fillStyle='rgba(40,40,40,0.72)';
+        roundRect(citCtx,bx,by,bW,bH,10);
+        citCtx.fill();
+        citCtx.globalAlpha=1;
+        // Texte
+        citCtx.fillStyle='rgba(255,255,255,0.9)';
+        citCtx.font='italic '+fontSize+'px "EB Garamond",serif';
+        citCtx.textBaseline='top';
+        lines.forEach(function(l,i){citCtx.fillText(l,bx+padX,by+padY+i*lineH);});
+        // Petite flèche vers le point
+        citCtx.fillStyle='rgba(40,40,40,0.72)';
+        citCtx.beginPath();
+        citCtx.moveTo(sx-8,by+bH); citCtx.lineTo(sx+8,by+bH); citCtx.lineTo(sx,sy-6);
+        citCtx.closePath(); citCtx.fill();
+        citCtx.restore();
+      });
+    }
+
+    function roundRect(ctx,x,y,w,h,r){
+      ctx.beginPath();
+      ctx.moveTo(x+r,y);ctx.lineTo(x+w-r,y);ctx.arcTo(x+w,y,x+w,y+r,r);
+      ctx.lineTo(x+w,y+h-r);ctx.arcTo(x+w,y+h,x+w-r,y+h,r);
+      ctx.lineTo(x+r,y+h);ctx.arcTo(x,y+h,x,y+h-r,r);
+      ctx.lineTo(x,y+r);ctx.arcTo(x,y,x+r,y,r);ctx.closePath();
+    }
+
+    function showCitation(feat){
+      if(feat.visible) return;
+      feat.visible=true;
+      // drawAllCitations() est appelé automatiquement par le RAF
+    }
+
+    function hideCitation(feat){
+      if(!feat.visible) return;
+      feat.visible=false;
+    }
+
+    function updateCitations(etape,boatLon,boatLat){
+      citFeats.forEach(function(feat){
+        if(feat.etape!==etape){
+          if(feat.visible){feat.visible=false;feat.everShown=false;
+            var el=document.getElementById('citation-popup');
+            el.classList.remove('visible');setTimeout(function(){el.innerHTML='';},600);}
+          return;
+        }
+        // Affiche quand < 200km, et reste affichée après (everShown)
+        if(!feat.everShown && boatLon!=null){
+          var d=hav({lon:boatLon,lat:boatLat},{lon:feat.lon,lat:feat.lat});
+          if(d<=200){ feat.everShown=true; showCitation(feat); }
+        }
+      });
+    }
+
+    // ── Bateau ───────────────────────────────────
     function makeBoatSym(h,bh){return{type:"point-3d",symbolLayers:[{type:"object",resource:{href:GH+"boat.glb"},height:bh,heading:(h+180)%360,anchor:"center"}]};}
-    function initBoat(lon,lat,bh,bz){lastHead=0;lastBH=bh;boatGfx=new Graphic({geometry:new Point({longitude:lon,latitude:lat,z:bz,spatialReference:{wkid:4326}}),symbol:makeBoatSym(0,bh)});boatLayer.add(boatGfx);}
+    function initBoat(lon,lat,bh,bz){lastHead=0;lastBH=bh;trailBoatT=bh;boatGfx=new Graphic({geometry:new Point({longitude:lon,latitude:lat,z:bz,spatialReference:{wkid:4326}}),symbol:makeBoatSym(0,bh)});boatLayer.add(boatGfx);}
     function moveBoat(lon,lat,h,bh,bz){
       if(!boatGfx)return;
       boatGfx.geometry=new Point({longitude:lon,latitude:lat,z:bz,spatialReference:{wkid:4326}});
       var dH=Math.abs(((h-lastHead)+540)%360-180);
-      if(dH>HEADING_THRESHOLD||bh!==lastBH){boatGfx.symbol=makeBoatSym(h,bh);lastHead=h;lastBH=bh;}
+      if(dH>HEADING_THRESHOLD||bh!==lastBH){boatGfx.symbol=makeBoatSym(h,bh);lastHead=h;lastBH=bh;trailBoatT=bh;}
     }
 
-    // ── Sillage ────────────────────────────────────
+    // ── Sillage ──────────────────────────────────
+    // Largeur fixe en points, proportionnelle à boat_t visuellement
+    // boat_t=5000m → 5pt, boat_t=12000m → 12pt
+    function trailWidth(boatT){ return Math.min(12,Math.max(2,boatT/1000)); }
     function buildTrailGfx(boatT){
       if(trailLineGfx){trailLayer.remove(trailLineGfx);trailLineGfx=null;}
+      var w=trailWidth(boatT);
       trailLineGfx=new Graphic({
-        geometry:new Polyline({paths:EMPTY_PATH,spatialReference:{wkid:4326}}),
-        symbol:{type:"simple-line",color:[200,10,10,0.9],width:Math.min(12,Math.max(3,boatT/800)),cap:"butt",join:"round",style:"solid"}
+        geometry:new Polyline({paths:EMPTY,spatialReference:{wkid:4326}}),
+        symbol:{type:"simple-line",color:[200,10,10,0.9],width:w,cap:"butt",join:"round",style:"solid"}
       });
       trailLayer.add(trailLineGfx);
     }
     function updateTrail(){
       if(!trailLineGfx)return;
-      if(trailPts.length<2){trailLineGfx.geometry=new Polyline({paths:EMPTY_PATH,spatialReference:{wkid:4326}});return;}
+      if(trailPts.length<2){trailLineGfx.geometry=new Polyline({paths:EMPTY,spatialReference:{wkid:4326}});return;}
       var maxD=trailPts[trailPts.length-1].cumKm,keep=Math.max(0,maxD-TRAIL_MAX_KM),si=0;
       while(si<trailPts.length-1&&trailPts[si].cumKm<keep)si++;
       var vis=trailPts.slice(si);
-      if(vis.length<2){trailLineGfx.geometry=new Polyline({paths:EMPTY_PATH,spatialReference:{wkid:4326}});return;}
+      if(vis.length<2){trailLineGfx.geometry=new Polyline({paths:EMPTY,spatialReference:{wkid:4326}});return;}
       trailLineGfx.geometry=new Polyline({paths:[vis.map(function(p){return[p.lon,p.lat];})],spatialReference:{wkid:4326}});
+
     }
 
-    // ── Interpolation ──────────────────────────────
+    // ── Interpolation ────────────────────────────
     function interp(st,dk){
       var c=st.coords,cd=st.cumDist;
       for(var i=0;i<cd.length-1;i++){
-        if(cd[i]<=dk&&cd[i+1]>=dk){
-          var seg=cd[i+1]-cd[i],t=seg>0?(dk-cd[i])/seg:0;
-          var a={lon:c[i][0],lat:c[i][1]},b={lon:c[i+1][0],lat:c[i+1][1]};
-          return{lon:a.lon+(b.lon-a.lon)*t,lat:a.lat+(b.lat-a.lat)*t,heading:brng(a,b)};
-        }
+        if(cd[i]<=dk&&cd[i+1]>=dk){var seg=cd[i+1]-cd[i],t=seg>0?(dk-cd[i])/seg:0;var a={lon:c[i][0],lat:c[i][1]},b={lon:c[i+1][0],lat:c[i+1][1]};return{lon:a.lon+(b.lon-a.lon)*t,lat:a.lat+(b.lat-a.lat)*t,heading:brng(a,b)};}
       }
       var l=c[c.length-1];return{lon:l[0],lat:l[1],heading:0};
     }
     function vertsInRange(st,dA,dB){
       var c=st.coords,cd=st.cumDist,pA=interp(st,dA),pts=[{lon:pA.lon,lat:pA.lat}];
-      for(var i=0;i<c.length;i++)if(cd[i]>dA&&cd[i]<dB)pts.push({lon:c[i][0],lat:c[i][1]});
+      for(var i=0;i<c.length;i++) if(cd[i]>dA&&cd[i]<dB) pts.push({lon:c[i][0],lat:c[i][1]});
       var pB=interp(st,dB);pts.push({lon:pB.lon,lat:pB.lat});return pts;
     }
+    function stageByEtape(e){for(var i=0;i<stages.length;i++){if(stages[i].etape===e)return stages[i];}return null;}
 
-    // ── Boucle animation ───────────────────────────
-    function animLoop(ts){
+    // ── Boucle animation ─────────────────────────
+    // Caméra libre - l'utilisateur a le contrôle total
+    function updateCamera(){ /* désactivé - caméra libre */ }
+
+        function animLoop(ts){
       if(!isPlaying)return;
       if(!lastTs)lastTs=ts;
       var dt=(ts-lastTs)/1000;lastTs=ts;
-      var st=stages[currentStage],speed=st.totalDist/STEP_DURATION_S;
+      var st=stages[currentStage],speed=st.totalDist/(st.duree||STEP_DURATION_S);
       prevDist=distCovered;distCovered=Math.min(st.totalDist,distCovered+speed*dt);
       var pos=interp(st,distCovered);
       moveBoat(pos.lon,pos.lat,pos.heading,st.boatHeight,st.boatZ);
@@ -840,14 +1100,18 @@ function initApp(){
       }
       updateTrail();
       updateLabels(st.etape,distCovered);
+      updateIcones(st.etape,pos.lon,pos.lat);
+      updateCitations(st.etape,pos.lon,pos.lat);
       var pct=distCovered/st.totalDist;
       var rect=document.querySelector('.stage-rect[data-idx="'+currentStage+'"]');
       if(rect)rect.querySelector('.stage-progress').style.width=(pct*100)+'%';
       if(distCovered>=st.totalDist){
         isPlaying=false;
         if(rect){rect.classList.remove('active');rect.classList.add('done');rect.querySelector('.stage-progress').style.width='100%';}
+        updateIcones(-1,null,null); // cacher les icones
+        citFeats.forEach(function(f){hideCitation(f);});
         if(currentStage<stages.length-1){
-          msg('Etape '+stages[currentStage].etape+' terminee - prochaine dans '+PAUSE_BETWEEN_S+'s');
+          msg('Etape '+st.etape+' terminee');
           pauseTimer=setTimeout(function(){currentStage++;startStage(currentStage);},PAUSE_BETWEEN_S*1000);
         }else{msg('Arrive a destination !');document.getElementById('btnPlay').textContent='▶ Rejouer';}
         return;
@@ -858,11 +1122,17 @@ function initApp(){
     function startStage(idx){
       if(idx>=stages.length)return;
       currentStage=idx;distCovered=0;prevDist=0;trailPts=[];lastTs=null;isPlaying=true;
-      resetLabels(stages[idx].etape);
+      currentStageEtape=stages[idx].etape;
+      // Masquer TOUS les labels avant de commencer la nouvelle étape
+      textLabels.forEach(function(lbl){
+        var st=labelStates[lbl.text];
+        if(st&&st.opacity!==0){st.opacity=0;updateTextLabel(lbl,0);}
+      });
       buildTrailGfx(stages[idx].boatHeight);
       updateRectHighlight(idx);autoScrollToStage(idx);
       var s=stages[idx].coords[0];
-      view.goTo({target:[s[0],s[1]],zoom:10,tilt:50},{duration:1200});
+      // Zoom initial sur le premier point de l'étape
+      view.goTo({position:{longitude:s[0],latitude:s[1],z:80000},tilt:55},{duration:1200});
       document.getElementById('btnPlay').textContent='⏸ Pause';
       animRafId=requestAnimationFrame(animLoop);
     }
@@ -872,42 +1142,46 @@ function initApp(){
       var p=stages[0].coords[0],st=stages[0];
       initBoat(p[0],p[1],st.boatHeight,st.boatZ);
       buildTrailGfx(st.boatHeight);
-      view.goTo({target:[p[0],p[1]],zoom:8,tilt:45},{duration:3500});
+      view.goTo({position:{longitude:p[0],latitude:p[1],z:800000},tilt:40},{duration:3500});
       document.getElementById('btnPlay').textContent='▶ Lancer';
     }
 
-    // ── Portraits explorateurs ─────────────────────
+    // ── Portraits ────────────────────────────────
     function buildPortraitUI(){
-      var wrap=document.getElementById('portraits-wrap');
-      wrap.innerHTML='';
+      var wrap=document.getElementById('portraits-wrap');wrap.innerHTML='';
       EXPLORERS.forEach(function(exp){
         var img=document.createElement('img');
-        img.src=exp.portrait;
-        img.alt='Explorateur '+exp.id;
+        img.src=exp.portrait;img.alt=exp.label;
         img.className='explorer-portrait'+(exp.id===activeExplorer?' active':'');
-        img.crossOrigin='anonymous';
-        img.title='Explorateur '+exp.id.toUpperCase();
+        img.crossOrigin='anonymous';img.title=exp.label;
         img.addEventListener('click',function(){
-          if(activeExplorer===exp.id) return;
+          if(activeExplorer===exp.id)return;
           activeExplorer=exp.id;
-          document.querySelectorAll('.explorer-portrait').forEach(function(el){el.classList.remove('active');});
+          // Désélectionner TOUT (portraits + thèmes)
+          document.querySelectorAll('.explorer-portrait, .theme-circle').forEach(function(el){el.classList.remove('active');});
           img.classList.add('active');
-          var found=null;
-          for(var i=0;i<EXPLORERS.length;i++){if(EXPLORERS[i].id===exp.id){found=EXPLORERS[i];break;}}
-          if(found) loadExplorer(found);
+          showExplorerBanner(exp.label);
+          var found=null;for(var i=0;i<EXPLORERS.length;i++){if(EXPLORERS[i].id===exp.id){found=EXPLORERS[i];break;}}
+          if(found)loadExplorer(found);
         });
         wrap.appendChild(img);
       });
     }
 
-    // ── Contrôles ──────────────────────────────────
+    // ── Contrôles ────────────────────────────────
     window.ctrlPlay=function(){
       if(!stagesReady)return;
       if(!isPlaying&&distCovered>=(stages[currentStage]?stages[currentStage].totalDist:0)&&currentStage>=stages.length-1){ctrlReset();startStage(0);return;}
       if(!isPlaying&&distCovered===0&&trailPts.length===0){startStage(currentStage);return;}
       isPlaying=!isPlaying;
-      if(isPlaying){lastTs=null;document.getElementById('btnPlay').textContent='⏸ Pause';animRafId=requestAnimationFrame(animLoop);}
-      else{cancelAnimationFrame(animRafId);clearTimeout(pauseTimer);document.getElementById('btnPlay').textContent='▶ Continuer';}
+      if(isPlaying){
+        lastTs=null;
+        document.getElementById('btnPlay').textContent='⏸ Pause';
+        animRafId=requestAnimationFrame(animLoop);
+      } else {
+        cancelAnimationFrame(animRafId);clearTimeout(pauseTimer);
+        document.getElementById('btnPlay').textContent='▶ Continuer';
+      }
     };
     window.ctrlReset=function(){
       cancelAnimationFrame(animRafId);clearTimeout(pauseTimer);
@@ -915,8 +1189,9 @@ function initApp(){
       document.getElementById('btnPlay').textContent='▶ Lancer';
       document.querySelectorAll('.stage-rect').forEach(function(r){r.classList.remove('active','done');r.querySelector('.stage-progress').style.width='0%';});
       textLabels.forEach(function(lbl){var st=labelStates[lbl.text];if(st&&st.opacity!==0){st.opacity=0;updateTextLabel(lbl,0);}});
-      updateTrail();
-      if(stages.length){var p=stages[0].coords[0],st=stages[0];moveBoat(p[0],p[1],0,st.boatHeight,st.boatZ);view.goTo({target:[p[0],p[1]],zoom:8,tilt:45},{duration:1200});}
+      updateTrail(); updateIcones(-1,null,null);
+      citFeats.forEach(function(f){hideCitation(f);});
+      if(stages.length){var p=stages[0].coords[0],st=stages[0];moveBoat(p[0],p[1],0,st.boatHeight,st.boatZ);view.goTo({position:{longitude:p[0],latitude:p[1],z:800000},tilt:40},{duration:1200});}
       viewOffset=0;renderViewport();
     };
     window.launchStage=function(idx){
@@ -926,7 +1201,7 @@ function initApp(){
       distCovered=0;prevDist=0;trailPts=[];startStage(idx);
     };
 
-    // ── UI ─────────────────────────────────────────
+    // ── UI ───────────────────────────────────────
     var viewOffset=0;
     function buildUI(){buildPortraitUI();viewOffset=0;renderViewport();}
     function renderViewport(){
@@ -953,28 +1228,309 @@ function initApp(){
 
     function makeDemoA(){
       var e1=[];
-      for(var i=0;i<=60;i++){var t=i/60;e1.push([0+(-5-0)*t,-65+(-70+65)*t]);}
+      for(var i=0;i<=60;i++){var t=i/60;e1.push([(-50)*t,(-60)+(-72+60)*t]);}
       return{type:"FeatureCollection",features:[{type:"Feature",properties:{etape:1,boat_t:5000},geometry:{type:"LineString",coordinates:e1}}]};
     }
 
-    // ── Démarrage ──────────────────────────────────
+    function updateLegendForExplorer(){
+      var body=document.getElementById('legend-body');
+      if(!body) return;
+      body.innerHTML=
+        '<div class="legend-item"><div class="legend-line"></div><span>Sillage du navire</span></div>'+
+        '<div class="legend-item"><div class="legend-dot-blue"></div><span>Point d\'information</span></div>'+
+        '<div class="legend-item"><div class="legend-dot-teal"></div><span>Citation historique</span></div>';
+      var img=document.getElementById('legend-box-img');
+      if(img) img.style.display='none';
+    }
+
+    window._arcgisView = view;
+
+    // ── Canvas overlay pour images thématiques ──────
+    window._themeMeshLayer = null;
+
+
+    // ── Couches thématiques (Final / Fonte) ────────
+    var themeLoadToken=0;     // Token pour éviter les race conditions
+    var themeTrailLayer=new GraphicsLayer({elevationInfo:{mode:"on-the-ground"}});
+    map.add(themeTrailLayer);
+
+    // Couleurs et styles des classes A-I
+    var CLASSE_STYLES={
+      A:{color:[255,220,0,0.9], style:'dot'},         // jaune pointillé
+      B:{color:[255,220,0,0.9], style:'dash'},        // jaune tiret
+      C:{color:[255,220,0,0.9], style:'solid'},       // jaune trait plein
+      D:{color:[255,140,0,0.9], style:'dot'},         // orange pointillé
+      E:{color:[255,140,0,0.9], style:'dash'},        // orange tiret
+      F:{color:[255,140,0,0.9], style:'solid'},       // orange trait plein
+      G:{color:[160,60,200,0.9],style:'dot'},         // violet pointillé
+      H:{color:[160,60,200,0.9],style:'dash'},        // violet tiret
+      I:{color:[160,60,200,0.9],style:'solid'}        // violet trait plein
+    };
+
+    var CLASS_LABELS={
+      A:'Descriptif & Paysage',   B:'Descriptif & Biodiversité',   C:'Descriptif & Expérience',
+      D:'Émotionnel & Paysage',   E:'Émotionnel & Biodiversité',   F:'Émotionnel & Expérience',
+      G:'Analytique & Paysage',   H:'Analytique & Biodiversité',   I:'Analytique & Expérience'
+    };
+
+    window._appLoadTheme=function(themeId){
+      // Arrêter animation
+      cancelAnimationFrame(animRafId);clearTimeout(pauseTimer);
+      isPlaying=false;distCovered=0;prevDist=0;lastTs=null;
+      trailLayer.removeAll();textLayer.removeAll();iconeLayer.removeAll();
+      citLayer.removeAll();boatLayer.removeAll();themeTrailLayer.removeAll();
+      trailPts=[];trailLineGfx=null;boatGfx=null;lastHead=null;lastBH=null;
+      stages=[];stagesReady=false;
+      // Supprimer l'ancien MediaLayer si existant
+      if(window._themeMeshLayer) window._themeMeshLayer.removeAll();
+      window._themeImages=[];
+      themeLoadToken++; // invalide tous les fetch en cours
+      // Vider et masquer toutes les citations
+      citFeats.forEach(function(f){f.visible=false;f.everShown=false;});
+      citFeats=[];
+      if(citCanvas&&citCtx) citCtx.clearRect(0,0,citCanvas.width,citCanvas.height);
+      // Vider rectangles d'étape
+      document.getElementById('stages-viewport').innerHTML='';
+      document.getElementById('stages-viewport').style.width='0';
+      document.getElementById('arrowLeft').classList.add('hidden');
+      document.getElementById('arrowRight').classList.add('hidden');
+      document.getElementById('btnPlay').textContent='▶ Lancer';
+      updateLegendForTheme(themeId);
+      if(themeId==='final') loadFinal();
+      else if(themeId==='fonte') loadFonte();
+    };
+
+    // ── Thème FINAL ───────────────────────────────
+    function loadFinal(){
+      var srcs=[
+        {geo:GH+'urville_texte.geojson', img:GH+'urville_nuage.png', pgw:GH+'urville_nuage.pgw'},
+        {geo:GH+'charcot_texte.geojson', img:GH+'charcot_nuage.png', pgw:GH+'charcot_nuage.pgw'}
+      ];
+      srcs.forEach(function(src){
+        // Lignes colorées par classe
+        fetch(src.geo).then(function(r){return r.json();}).then(function(geo){
+          geo.features.forEach(function(f){
+            var cl=(f.properties.classe||'A').toUpperCase();
+            var st=CLASSE_STYLES[cl]||CLASSE_STYLES.A;
+            var g=f.geometry;
+            var coords=g.type==='LineString'?g.coordinates:g.coordinates.reduce(function(a,b){return a.concat(b);});
+            themeTrailLayer.add(new Graphic({
+              geometry:new Polyline({paths:[coords],spatialReference:{wkid:4326}}),
+              symbol:{type:'simple-line',color:st.color,width:2,style:st.style}
+            }));
+          });
+        }).catch(function(e){dlog('warn','Final geo erreur: '+e);});
+        // Image nuage via MediaLayer
+        addMediaLayerFromPGW(src.img, src.pgw);
+      });
+      updateLegendFinal();
+    }
+
+    // ── Thème FONTE ───────────────────────────────
+    function loadFonte(){
+      addMediaLayerFromPGW(GH+'fonte.png', GH+'fonte.pgw');
+      // Légende fonte
+      var legImg=new Image();legImg.crossOrigin='anonymous';
+      legImg.onload=function(){
+        document.getElementById('legend-box-img').src=legImg.src;
+        document.getElementById('legend-box-img').style.display='block';
+      };
+      legImg.src=GH+'legende_fonte.png';
+      updateLegendFonte();
+    }
+
+    // ── MediaLayer : image géoréférencée sur le globe ──
+    // Supporte EPSG:3031 (via conversion corners) et EPSG:4326
+    // MediaLayer + ExtentAndRotationGeoreference = image collée sur le globe,
+    // visible sous n'importe quel angle, avec relief
+    // ══════════════════════════════════════════════════════
+    //  MEDIA LAYER depuis PGW
+    //  - WGS84 (abs(A)<1): ExtentAndRotationGeoreference simple
+    //  - EPSG:3031 (abs(A)>=1): reprojection canvas puis MediaLayer
+    // ══════════════════════════════════════════════════════
+    function addMediaLayerFromPGW(imgUrl, pgwUrl){
+      var myToken=themeLoadToken;
+      fetch(pgwUrl)
+        .then(function(r){ if(!r.ok) throw 'PGW HTTP '+r.status; return r.text(); })
+        .then(function(txt){
+          if(myToken!==themeLoadToken) return;
+          var L=txt.trim().split('\n').map(Number);
+          var pgw={A:L[0],D:L[1],B:L[2],E:L[3],C:L[4],F:L[5]};
+          dlog('info','PGW: A='+pgw.A.toFixed(1)+' C='+pgw.C.toFixed(0)+' F='+pgw.F.toFixed(0));
+          var im=new Image(); im.crossOrigin='anonymous';
+          im.onload=function(){
+            if(myToken!==themeLoadToken) return;
+            var W=im.naturalWidth, H=im.naturalHeight;
+            dlog('info','Image: '+W+'x'+H+' '+imgUrl.split('/').pop());
+            var xmin=pgw.C-pgw.A/2, xmax=pgw.C+pgw.A*W-pgw.A/2;
+            var ymax=pgw.F-Math.abs(pgw.E)/2, ymin=pgw.F-Math.abs(pgw.E)*H-Math.abs(pgw.E)/2;
+            dlog('info','3031 bbox: ('+xmin.toFixed(0)+','+ymin.toFixed(0)+')→('+xmax.toFixed(0)+','+ymax.toFixed(0)+')');
+            var grid=64, positions=[], uvs=[], faces=[];
+            for(var gy=0;gy<=grid;gy++){
+              var v=gy/grid, curY=ymin+(ymax-ymin)*v;
+              for(var gx=0;gx<=grid;gx++){
+                var u=gx/grid, curX=xmin+(xmax-xmin)*u;
+                var wgs=proj3031toWGS84(curX,curY);
+                positions.push(wgs.lon,wgs.lat,4000);
+                uvs.push(u,v);
+              }
+            }
+            for(var gy=0;gy<grid;gy++){
+              for(var gx=0;gx<grid;gx++){
+                var i=gy*(grid+1)+gx;
+                faces.push(i,i+1,i+grid+1);
+                faces.push(i+1,i+grid+2,i+grid+1);
+              }
+            }
+            dlog('info','Mesh: '+(positions.length/3)+' vtx, '+(faces.length/3)+' tri');
+            require(["esri/geometry/Mesh","esri/Graphic"],function(MeshCls,GfxCls){
+              if(myToken!==themeLoadToken){dlog('warn','Mesh annulé');return;}
+              var mesh=new MeshCls({
+                vertexAttributes:{position:new Float64Array(positions),uv:new Float32Array(uvs)},
+                components:[{faces:new Uint32Array(faces),material:{colorTexture:{url:imgUrl},alphaMode:'blend',doubleSided:true}}],
+                spatialReference:{wkid:4326}
+              });
+              var gfx=new GfxCls({geometry:mesh,symbol:{type:'mesh-3d',symbolLayers:[{type:'fill'}]}});
+              if(!window._themeMeshLayer){
+                window._themeMeshLayer=new GraphicsLayer({elevationInfo:{mode:'absolute-height'}});
+                map.add(window._themeMeshLayer);
+              }
+              window._themeMeshLayer.add(gfx);
+              dlog('ok','Mesh 3D ancré: '+imgUrl.split('/').pop());
+            });
+          };
+          im.onerror=function(){dlog('err','Image erreur: '+imgUrl);};
+          im.src=imgUrl;
+        })
+        .catch(function(e){dlog('err','PGW erreur: '+pgwUrl+' → '+e);});
+    }
+
+    // ── Légendes ──────────────────────────────────
+    function updateLegendForTheme(id){
+      var box=document.getElementById('legend-box');
+      var body=document.getElementById('legend-body');
+      body.innerHTML='';
+      document.getElementById('legend-box-img').style.display='none';
+      window._themeImages=[];
+    }
+    function updateLegendFinal(){
+      var body=document.getElementById('legend-body');
+      body.innerHTML='';
+      // Styles SVG pour chaque type de ligne (adaptatifs à la largeur)
+      var svgStyles={
+        'solid':  function(r,g,b){ return '<line x1="0" y1="2" x2="32" y2="2" stroke="rgb('+r+','+g+','+b+')" stroke-width="2.5"/>'; },
+        'dash':   function(r,g,b){ return '<line x1="0" y1="2" x2="32" y2="2" stroke="rgb('+r+','+g+','+b+')" stroke-width="2.5" stroke-dasharray="6,4"/>'; },
+        'dot':    function(r,g,b){ return '<line x1="0" y1="2" x2="32" y2="2" stroke="rgb('+r+','+g+','+b+')" stroke-width="2.5" stroke-dasharray="2,4" stroke-linecap="round"/>'; }
+      };
+      Object.keys(CLASS_LABELS).forEach(function(k){
+        var s=CLASSE_STYLES[k];
+        var r=s.color[0],g=s.color[1],b=s.color[2];
+        var svgFn=svgStyles[s.style]||svgStyles['solid'];
+        var item=document.createElement('div');item.className='legend-item';
+        // SVG inline : toujours 32px large, 4px haut, trait net
+        var svgWrap=document.createElement('div');
+        svgWrap.style.cssText='flex-shrink:0;width:32px;height:4px;';
+        svgWrap.innerHTML='<svg width="32" height="4" viewBox="0 0 32 4" xmlns="http://www.w3.org/2000/svg">'+svgFn(r,g,b)+'</svg>';
+        var lbl=document.createElement('span');lbl.textContent=CLASS_LABELS[k];
+        item.appendChild(svgWrap);item.appendChild(lbl);
+        body.appendChild(item);
+      });
+    }
+    function updateLegendFonte(){
+      var body=document.getElementById('legend-body');
+      body.innerHTML='<span style="font-style:italic;opacity:.7">Voir légende ci-dessous</span>';
+    }
+
     view.when(function(){
+      initCitCanvas();
       var firstExp=EXPLORERS[0];
       for(var i=0;i<EXPLORERS.length;i++){if(EXPLORERS[i].id===activeExplorer){firstExp=EXPLORERS[i];break;}}
       loadExplorer(firstExp);
     });
 
-  }); // fin require
-} // fin initApp
+  });// fin require
+}// fin initApp
 
 // =====================================================
-//  PERSONNAGE
+//  PERSONNAGE + LÉGENDE
 // =====================================================
+// ══════════════════════════════════════════════
+//  PANNEAU DEBUG
+// ══════════════════════════════════════════════
+var _dbgOpen=false;
+window.toggleDebug=function(){
+  _dbgOpen=!_dbgOpen;
+  document.getElementById('debug-panel').classList.toggle('open',_dbgOpen);
+  document.getElementById('debug-toggle').textContent=_dbgOpen?'⬛ DEBUG (ON)':'⬛ DEBUG';
+};
+window.clearDbgLog=function(){ document.getElementById('dbg-log').innerHTML=''; };
+window.copyDebugLog=function(){
+  var lines=[]; 
+  document.querySelectorAll('#dbg-log .dl').forEach(function(d){lines.push(d.textContent);});
+  navigator.clipboard.writeText(lines.join('\n')).then(function(){
+    var btn=document.querySelector('#dbg-hdr .dbg-btn');
+    var orig=btn.textContent; btn.textContent='✓ COPIÉ';
+    setTimeout(function(){btn.textContent=orig;},1500);
+  }).catch(function(){ alert(lines.join('\n')); });
+};
+
+function dlog(type, msg){
+  var el=document.getElementById('dbg-log');
+  if(!el) return;
+  var now=new Date(), ts=now.getHours()+':'+String(now.getMinutes()).padStart(2,'0')+':'+String(now.getSeconds()).padStart(2,'0');
+  var d=document.createElement('div');
+  d.className='dl '+({info:'i',warn:'w',err:'e',ok:'ok'}[type]||'i');
+  d.textContent='['+ts+'] '+msg;
+  el.appendChild(d);
+  while(el.children.length>120) el.removeChild(el.firstChild);
+  el.scrollTop=el.scrollHeight;
+}
+
+// Intercepter console
+(function(){
+  var orig={log:console.log,warn:console.warn,error:console.error};
+  console.log=function(){orig.log.apply(console,arguments);dlog('info',Array.from(arguments).map(String).join(' '));};
+  console.warn=function(){orig.warn.apply(console,arguments);dlog('warn',Array.from(arguments).map(String).join(' '));};
+  console.error=function(){orig.error.apply(console,arguments);dlog('err',Array.from(arguments).map(String).join(' '));};
+  window.addEventListener('error',function(e){dlog('err','JS: '+e.message+' (L'+e.lineno+')');});
+  window.addEventListener('unhandledrejection',function(e){dlog('err','Promise: '+(e.reason&&e.reason.message?e.reason.message:String(e.reason)));});
+})();
+
 window.closeCharacter=function(){
   var w=document.getElementById('character-wrap');
-  w.style.transition='opacity 0.5s ease';w.style.opacity='0';
-  setTimeout(function(){w.style.display='none';},500);
+  w.style.transition='opacity .5s ease';w.style.opacity='0';
+  setTimeout(function(){
+    w.style.display='none';
+    // Afficher la légende après fermeture du personnage
+    document.getElementById('legend-box').classList.add('visible');
+  },500);
 };
+
+// ── Sélection unifiée (portraits + thèmes = UN seul actif parmi les 4) ──
+// Chaque portrait et chaque cercle thème font partie du même groupe de sélection
+function selectAny(type, id, el){
+  document.querySelectorAll('.explorer-portrait, .theme-circle').forEach(function(c){c.classList.remove('active');});
+  el.classList.add('active');
+
+  if(type==='theme'){
+    var labels={'final':'Final','fonte':'Fonte'};
+    showExplorerBanner(labels[id]||id);
+    // Reset activeExplorer → permet de recliquer n'importe quel portrait ensuite
+    activeExplorer=null;
+    // Vider les rectangles d'étape (pas de trajet pour ces modes)
+    if(window._appLoadTheme) window._appLoadTheme(id);
+    // Caméra Antarctique, vue ortho
+    if(window._arcgisView){
+      // SceneView: utiliser camera pour vue orthogonale Antarctique
+      window._arcgisView.goTo({
+        position:{longitude:0,latitude:-90,z:6000000},
+        tilt:0,
+        heading:0
+      },{duration:1800});
+    }
+  }
+}
+window.selectTheme=function(id,el){ selectAny('theme',id,el); };
 </script>
 </body>
 </html>
