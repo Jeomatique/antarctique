@@ -1,0 +1,8 @@
+{
+"type": "FeatureCollection",
+"name": "charcot_cameraboat",
+"crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
+"features": [
+{ "type": "Feature", "properties": { "etape": 1, "zoom": 9 }, "geometry": { "type": "LineString", "coordinates": [ [ 0.066648072662629, 49.482449249112371 ], [ -1.807285832703101, 50.01188004537984 ], [ -5.088501202455713, 48.739572044863529 ], [ -36.218194978246444, -1.315703238607426 ], [ -38.628883821329985, -23.413684300206633 ], [ -68.611826307181659, -52.358691311952889 ] ] } }
+]
+}
