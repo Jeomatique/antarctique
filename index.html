@@ -244,6 +244,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0a0f1a;font-family:
 
 /* ── CITATION POPUP ─────────────────────────── */
 /* Citation fixée au point géo via canvas overlay */
+/* Citation via canvas overlay géolocalisé */
 #cit-canvas{position:absolute;inset:0;pointer-events:none;z-index:8;}
 
 /* ── FOOTER BANDEAU ─────────────────────────── */
@@ -357,7 +358,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0a0f1a;font-family:
     <div id="ctrl-bar">
       <button id="btnPlay" onclick="ctrlPlay()">&#9654; Lancer</button>
       <div class="sep"></div>
-      <button onclick="ctrlReset()">&#8635; Reset</button>
+      <button onclick="ctrlReset()">&#8635; Réinitialiser</button>
     </div>
     <div id="explorer-row">
       <div id="portraits-wrap" style="display:flex;gap:8px;align-items:center;"></div>
@@ -371,7 +372,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0a0f1a;font-family:
       <!-- Cercles thématiques -->
       <div style="display:flex;gap:8px;">
         <div class="theme-circle tc-final" id="tc-final" onclick="selectTheme('final',this)">Final</div>
-        <div class="theme-circle tc-fonte" id="tc-fonte" onclick="selectTheme('fonte',this)">Fonte</div>
+        <div class="theme-circle tc-fonte" id="tc-fonte" onclick="openFonte()">Fonte</div>
       </div>
     </div>
   </div>
@@ -465,12 +466,7 @@ var EXPLORERS = [
     geo:GH+'urville.geojson', text:GH+'urville_texte.geojson',
     portrait:GH+'urville.png',
     icone:GH+'urville_icone_info.geojson',
-    citation:GH+'urville_citation.geojson' },
-  { id:'charcot',  label:'Jean-Baptiste Charcot',
-    geo:GH+'charcot.geojson', text:GH+'charcot_texte.geojson',
-    portrait:GH+'charcot.png',
-    icone:GH+'charcot_icone_info.geojson',
-    citation:GH+'charcot_citation.geojson' }
+    citation:GH+'urville_citation.geojson' }
 ];
 var activeExplorer = 'urville';
 
@@ -556,15 +552,6 @@ function showExplorerBanner(label){
     b.classList.remove('show');
   },2000);
 }
-
-// =====================================================
-//  THEMES (cercles)
-// =====================================================
-window.selectTheme=function(id,el){
-  document.querySelectorAll('.theme-circle').forEach(function(c){c.classList.remove('active');});
-  el.classList.add('active');
-  // Logique thème à implémenter
-};
 
 // =====================================================
 //  CHARGEMENT ARCGIS
@@ -791,7 +778,31 @@ function initApp(){
     function buildTextGfx(lbl,opacity){
       var sz=textSizePt(lbl.taille_m),hal=Math.max(1,Math.round(sz*0.10));
       var a=Math.round(Math.min(1,Math.max(0,opacity))*255);
-      return new Graphic({geometry:new Point({longitude:lbl.midLon,latitude:lbl.midLat,z:1,spatialReference:{wkid:4326}}),symbol:{type:"point-3d",symbolLayers:[{type:"text",text:lbl.text,size:sz,font:{family:"High Tower Text, serif",weight:"normal"},material:{color:[255,255,255,a]},halo:{color:[30,30,30,Math.round(Math.min(1,opacity)*220)],size:hal}}]}});
+      var haColor=[30,30,30,Math.round(Math.min(1,opacity)*220)];
+      // Callout: ligne ancrée au sol + bulle qui remonte → toujours visible
+      return new Graphic({
+        geometry:new Point({longitude:lbl.midLon,latitude:lbl.midLat,z:1,spatialReference:{wkid:4326}}),
+        symbol:{
+          type:"point-3d",
+          symbolLayers:[{
+            type:"text",
+            text:lbl.text,
+            size:sz,
+            font:{family:"High Tower Text, serif",weight:"normal"},
+            material:{color:[255,255,255,a]},
+            halo:{color:haColor,size:hal},
+            // verticalOffset: élève le texte au-dessus des obstacles
+            verticalOffset:{screenLength:40,maxWorldLength:500000,minWorldLength:0}
+          }],
+          // Callout: petit trait reliant le texte à son ancrage au sol
+          callout:{
+            type:"line",
+            size:1,
+            color:[255,255,255,Math.round(Math.min(1,opacity)*160)],
+            border:{color:[0,0,0,0]}
+          }
+        }
+      });
     }
     function updateTextLabel(lbl,opacity){var o=textGfxMap[lbl.text];if(o)textLayer.remove(o);var g=buildTextGfx(lbl,opacity);textGfxMap[lbl.text]=g;textLayer.add(g);}
     function initTextGfx(){textLabels.forEach(function(lbl){var g=buildTextGfx(lbl,0);textGfxMap[lbl.text]=g;textLayer.add(g);});}
@@ -864,9 +875,9 @@ function initApp(){
         var pulse=new Graphic({
           geometry:buildCircleGeom(feat.lon,feat.lat,1),  // rayon 1km initial
           symbol:{type:"polygon-3d",symbolLayers:[{
-            type:"line",
-            material:{color:[100,180,255,0.7]},
-            size:2
+            type:"fill",
+            material:{color:[100,180,255,0]},
+            outline:{color:[100,180,255,0.7],size:2}
           }]}
         });
         pulse._phase=ci/3;
@@ -912,7 +923,16 @@ function initApp(){
 
     window.closeInfoPopup=function(){document.getElementById('info-popup').classList.remove('open');};
     function openInfoPopup(texte){
-      var raw=(texte||'').split('\\n').join('<br>').split('\n').join('<br>');
+      var raw=(texte||'').split('\\n').join('\n');
+      // <https://...image.ext> → <img>
+      raw=raw.replace(/<(https?:\/\/[^>]+\.(?:jpg|jpeg|png|gif|webp))>/gi,function(m,url){
+        return '<img src="'+url+'" crossorigin="anonymous" style="max-width:100%;border-radius:6px;margin:8px 0;display:block;" onerror="this.style.display=\'none\'"/>';
+      });
+      // <https://...> générique → lien
+      raw=raw.replace(/<(https?:\/\/[^>]+)>/g,function(m,url){
+        return '<a href="'+url+'" target="_blank" rel="noopener" style="color:#7bb8ff;">'+url+'</a>';
+      });
+      raw=raw.split('\n').join('<br>');
       document.getElementById('info-popup-text').innerHTML=raw;
       document.getElementById('info-popup').classList.add('open');
     }
@@ -953,47 +973,7 @@ function initApp(){
       (function citLoop(){requestAnimationFrame(citLoop);drawAllCitations();})();
     }
 
-    function drawAllCitations(){
-      if(!citCanvas||!citCtx) return;
-      citCtx.clearRect(0,0,citCanvas.width,citCanvas.height);
-      citFeats.forEach(function(feat){
-        if(!feat.visible||!feat.texte) return;
-        // Convertir le point géo en pixel écran
-        var pt=new Point({longitude:feat.lon,latitude:feat.lat,spatialReference:{wkid:4326}});
-        var scr=view.toScreen(pt);
-        if(!scr) return;
-        var sx=scr.x, sy=scr.y;
-        // Séparer sur \n littéral (deux chars) ET vrais sauts de ligne
-      var raw=(feat.texte||'').replace(/\\n/g,'\n');
-      var lines=raw.split('\n');
-        var fontSize=15, lineH=22, padX=18, padY=12;
-        // Mesurer largeur max
-        citCtx.font='italic '+fontSize+'px "EB Garamond",serif';
-        var maxW=0;
-        lines.forEach(function(l){var w=citCtx.measureText(l).width;if(w>maxW)maxW=w;});
-        var bW=maxW+padX*2, bH=lines.length*lineH+padY*2;
-        // Positionner la bulle au-dessus du point
-        var bx=sx-bW/2, by=sy-bH-20;
-        // Fond arrondi gris 60%
-        citCtx.save();
-        citCtx.globalAlpha=0.92;
-        citCtx.fillStyle='rgba(40,40,40,0.72)';
-        roundRect(citCtx,bx,by,bW,bH,10);
-        citCtx.fill();
-        citCtx.globalAlpha=1;
-        // Texte
-        citCtx.fillStyle='rgba(255,255,255,0.9)';
-        citCtx.font='italic '+fontSize+'px "EB Garamond",serif';
-        citCtx.textBaseline='top';
-        lines.forEach(function(l,i){citCtx.fillText(l,bx+padX,by+padY+i*lineH);});
-        // Petite flèche vers le point
-        citCtx.fillStyle='rgba(40,40,40,0.72)';
-        citCtx.beginPath();
-        citCtx.moveTo(sx-8,by+bH); citCtx.lineTo(sx+8,by+bH); citCtx.lineTo(sx,sy-6);
-        citCtx.closePath(); citCtx.fill();
-        citCtx.restore();
-      });
-    }
+    function drawAllCitations(){ /* citations gérées via HTML #citation-box */ }
 
     function roundRect(ctx,x,y,w,h,r){
       ctx.beginPath();
@@ -1003,16 +983,107 @@ function initApp(){
       ctx.lineTo(x,y+r);ctx.arcTo(x,y,x+r,y,r);ctx.closePath();
     }
 
+    // ── Citations canvas géolocalisé ────────────────────────
+    // Dessin sur canvas RAF, ancré au point géo via view.toScreen()
+    // Machine à écrire : les chars apparaissent progressivement
+    var _citTypeTimer=null;
+
     function showCitation(feat){
       if(feat.visible) return;
       feat.visible=true;
-      // drawAllCitations() est appelé automatiquement par le RAF
+      feat._displayedText='';  // texte affiché jusqu'ici
+      feat._typeIdx=0;         // index du prochain char
+      // Préparer le texte normalisé (\n littéraux → vrais \n)
+      feat._fullText=(feat.texte||'').split('\\n').join('\n');
+      // Démarrer la machine à écrire
+      (function typeStep(){
+        if(!feat.visible) return;
+        var full=feat._fullText;
+        if(feat._typeIdx<full.length){
+          feat._displayedText=full.substring(0,feat._typeIdx+1);
+          feat._typeIdx++;
+          var ch=full[feat._typeIdx-1];
+          var delay=ch===' '?30:(ch.match(/[.,;:!?\n]/)?100:40);
+          feat._typeTimer=setTimeout(typeStep,delay);
+        }
+      })();
     }
 
     function hideCitation(feat){
       if(!feat.visible) return;
       feat.visible=false;
+      clearTimeout(feat._typeTimer);
+      feat._displayedText='';
+      feat._typeIdx=0;
     }
+
+    function drawAllCitations(){
+      if(!citCanvas||!citCtx) return;
+      citCtx.clearRect(0,0,citCanvas.width,citCanvas.height);
+      citFeats.forEach(function(feat){
+        if(!feat.visible||!feat._displayedText) return;
+        var pt=new Point({longitude:feat.lon,latitude:feat.lat,spatialReference:{wkid:4326}});
+        var scr=view.toScreen(pt);
+        if(!scr) return;
+        var sx=scr.x, sy=scr.y;
+        var rawLines=(feat._displayedText).split('\n');
+        var fontSize=15, lineH=22, padX=18, padY=12, closeSize=16;
+        citCtx.font='italic '+fontSize+'px "EB Garamond",serif';
+        var maxW=0;
+        rawLines.forEach(function(l){var w=citCtx.measureText(l).width;if(w>maxW)maxW=w;});
+        maxW=Math.max(maxW,60);
+        var bW=maxW+padX*2+closeSize, bH=rawLines.length*lineH+padY*2;
+        var bx=sx-bW/2, by=sy-bH-24;
+        // Fond arrondi
+        citCtx.save();
+        citCtx.globalAlpha=0.92;
+        citCtx.fillStyle='rgba(20,20,20,0.72)';
+        roundRect(citCtx,bx,by,bW,bH,10);
+        citCtx.fill();
+        citCtx.globalAlpha=1;
+        // Texte centré
+        citCtx.fillStyle='rgba(255,255,255,0.9)';
+        citCtx.textBaseline='top';
+        citCtx.textAlign='center';
+        rawLines.forEach(function(l,i){
+          citCtx.fillText(l,bx+bW/2,by+padY+i*lineH);
+        });
+        citCtx.textAlign='left';
+        // Croix fermer (×)
+        citCtx.fillStyle='rgba(255,255,255,0.45)';
+        citCtx.font='bold 13px sans-serif';
+        citCtx.fillText('×',bx+bW-closeSize+2,by+6);
+        // Flèche vers le point géo
+        citCtx.fillStyle='rgba(20,20,20,0.72)';
+        citCtx.beginPath();
+        citCtx.moveTo(sx-7,by+bH);citCtx.lineTo(sx+7,by+bH);citCtx.lineTo(sx,sy-6);
+        citCtx.closePath();citCtx.fill();
+        citCtx.restore();
+        // Stocker bbox de la croix pour le clic
+        feat._closeBtn={x:bx+bW-closeSize,y:by,w:closeSize+4,h:closeSize+4};
+        feat._bubbleBox={x:bx,y:by,w:bW,h:bH+18};
+      });
+    }
+
+    // Clic sur le canvas citation → fermer si on clique la croix
+    document.addEventListener('DOMContentLoaded',function(){
+      var cc=document.getElementById('cit-canvas');
+      if(!cc) return;
+      cc.style.pointerEvents='all';
+      cc.addEventListener('click',function(e){
+        var rect=cc.getBoundingClientRect();
+        var cx=e.clientX-rect.left, cy=e.clientY-rect.top;
+        citFeats.forEach(function(feat){
+          if(!feat.visible||!feat._closeBtn) return;
+          var b=feat._closeBtn;
+          if(cx>=b.x&&cx<=b.x+b.w&&cy>=b.y&&cy<=b.y+b.h){
+            hideCitation(feat);
+            feat.everShown=false; // permet de la revoir
+          }
+        });
+      });
+    });
+
 
     function updateCitations(etape,boatLon,boatLat){
       citFeats.forEach(function(feat){
@@ -1111,7 +1182,7 @@ function initApp(){
         updateIcones(-1,null,null); // cacher les icones
         citFeats.forEach(function(f){hideCitation(f);});
         if(currentStage<stages.length-1){
-          msg('Etape '+st.etape+' terminee');
+          // msg supprimé
           pauseTimer=setTimeout(function(){currentStage++;startStage(currentStage);},PAUSE_BETWEEN_S*1000);
         }else{msg('Arrive a destination !');document.getElementById('btnPlay').textContent='▶ Rejouer';}
         return;
@@ -1130,9 +1201,6 @@ function initApp(){
       });
       buildTrailGfx(stages[idx].boatHeight);
       updateRectHighlight(idx);autoScrollToStage(idx);
-      var s=stages[idx].coords[0];
-      // Zoom initial sur le premier point de l'étape
-      view.goTo({position:{longitude:s[0],latitude:s[1],z:80000},tilt:55},{duration:1200});
       document.getElementById('btnPlay').textContent='⏸ Pause';
       animRafId=requestAnimationFrame(animLoop);
     }
@@ -1198,7 +1266,13 @@ function initApp(){
       cancelAnimationFrame(animRafId);clearTimeout(pauseTimer);
       isPlaying=false;
       document.querySelectorAll('.stage-rect').forEach(function(r){if(parseInt(r.dataset.idx)>idx){r.classList.remove('done');r.querySelector('.stage-progress').style.width='0%';}});
-      distCovered=0;prevDist=0;trailPts=[];startStage(idx);
+      distCovered=0;prevDist=0;trailPts=[];
+      // Téléportation caméra sur le premier point de l'étape (clic utilisateur uniquement)
+      if(stages[idx]){
+        var s=stages[idx].coords[0];
+        view.goTo({position:{longitude:s[0],latitude:s[1],z:80000},tilt:55},{duration:1200});
+      }
+      startStage(idx);
     };
 
     // ── UI ───────────────────────────────────────
@@ -1297,14 +1371,12 @@ function initApp(){
       document.getElementById('btnPlay').textContent='▶ Lancer';
       updateLegendForTheme(themeId);
       if(themeId==='final') loadFinal();
-      else if(themeId==='fonte') loadFonte();
     };
 
     // ── Thème FINAL ───────────────────────────────
     function loadFinal(){
       var srcs=[
-        {geo:GH+'urville_texte.geojson', img:GH+'urville_nuage.png', pgw:GH+'urville_nuage.pgw'},
-        {geo:GH+'charcot_texte.geojson', img:GH+'charcot_nuage.png', pgw:GH+'charcot_nuage.pgw'}
+        {geo:GH+'urville_texte.geojson', img:GH+'urville_nuage.png', pgw:GH+'urville_nuage.pgw'}
       ];
       srcs.forEach(function(src){
         // Lignes colorées par classe
@@ -1324,19 +1396,6 @@ function initApp(){
         addMediaLayerFromPGW(src.img, src.pgw);
       });
       updateLegendFinal();
-    }
-
-    // ── Thème FONTE ───────────────────────────────
-    function loadFonte(){
-      addMediaLayerFromPGW(GH+'fonte.png', GH+'fonte.pgw');
-      // Légende fonte
-      var legImg=new Image();legImg.crossOrigin='anonymous';
-      legImg.onload=function(){
-        document.getElementById('legend-box-img').src=legImg.src;
-        document.getElementById('legend-box-img').style.display='block';
-      };
-      legImg.src=GH+'legende_fonte.png';
-      updateLegendFonte();
     }
 
     // ── MediaLayer : image géoréférencée sur le globe ──
@@ -1436,11 +1495,6 @@ function initApp(){
         body.appendChild(item);
       });
     }
-    function updateLegendFonte(){
-      var body=document.getElementById('legend-body');
-      body.innerHTML='<span style="font-style:italic;opacity:.7">Voir légende ci-dessous</span>';
-    }
-
     view.when(function(){
       initCitCanvas();
       var firstExp=EXPLORERS[0];
@@ -1513,7 +1567,7 @@ function selectAny(type, id, el){
   el.classList.add('active');
 
   if(type==='theme'){
-    var labels={'final':'Final','fonte':'Fonte'};
+    var labels={'final':'Final'};
     showExplorerBanner(labels[id]||id);
     // Reset activeExplorer → permet de recliquer n'importe quel portrait ensuite
     activeExplorer=null;
@@ -1521,7 +1575,6 @@ function selectAny(type, id, el){
     if(window._appLoadTheme) window._appLoadTheme(id);
     // Caméra Antarctique, vue ortho
     if(window._arcgisView){
-      // SceneView: utiliser camera pour vue orthogonale Antarctique
       window._arcgisView.goTo({
         position:{longitude:0,latitude:-90,z:6000000},
         tilt:0,
@@ -1531,6 +1584,11 @@ function selectAny(type, id, el){
   }
 }
 window.selectTheme=function(id,el){ selectAny('theme',id,el); };
+
+// Fonte : ouvre Fonte.html dans une nouvelle fenêtre
+window.openFonte=function(){
+  window.open('Fonte.html','_blank');
+};
 </script>
 </body>
 </html>
