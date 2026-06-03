@@ -11,9 +11,9 @@
   left: 36px;
 }
 </style>
-<script src="./threejs/three.min.js"></script>
-<script src="./threejs/OrbitControls.js"></script>
-<script src="./threejs/ViewHelper.js"></script>
+<script src="./three.min.js"></script>
+<script src="./OrbitControls.js"></script>
+<script src="./ViewHelper.js"></script>
 <script src="./Qgis2threejs.js"></script>
 </head>
 <body>
@@ -123,7 +123,7 @@ var container = document.getElementById("view"),
 app.init(container);       // initialize viewer
 
 // load the scene
-app.loadSceneFile("./data/Fonte/scene.js", function (scene) {
+app.loadSceneFile("./scene.js", function (scene) {
   // scene file has been loaded
   app.start();
 }, function (scene) {
