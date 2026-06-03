@@ -1926,8 +1926,7 @@ window.openFontePanel=function(){
   _loadQ3DScripts(function(){
     _fonteInited=true;
 
-    // CORRECTION CRUCIALE : On vide le texte de chargement ET on injecte proprement
-    // les éléments DOM exigés par Qgis2threejs afin qu'ils soient présents au moment de l'init.
+    // Injection des éléments DOM exigés par Qgis2threejs
     container.innerHTML = `
       <div id="viewhelper"></div>
       <div id="progressbar"></div>
@@ -1951,8 +1950,20 @@ window.openFontePanel=function(){
     var app=Q3D.application;
     app.init(container);
 
-    // Charger la scène
-    loadScene();
+    // ── VRAIE MÉTHODE : Chargement dynamique du fichier de données de la scène ──
+    dlog('info', 'Chargement du modèle 3D (scene.js)…');
+    var sceneScript = document.createElement('script');
+    sceneScript.src = "./scene.js";
+    
+    sceneScript.onload = function() {
+      dlog('success', '═══ Scène 3D chargée et affichée avec succès ! ═══');
+    };
+    
+    sceneScript.onerror = function() {
+      dlog('err', '↳ ÉCHEC critique lors du chargement de scene.js');
+    };
+    
+    document.head.appendChild(sceneScript);
   });
 };
 window.closeFontePanel=function(){
