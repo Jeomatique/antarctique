@@ -1951,33 +1951,7 @@ window.openFontePanel=function(){
     // Ainsi, le fichier scene.js pourra y accéder sans problème.
     window.app = Q3D.application;
     window.app.init(container);
-    window.app = Q3D.application;
-    window.app.init(container);
-
-    // 🛡️ SÉCURITÉ ANTI-NaN : Si le relief exporté est vide, on le remplit de 0 
-    // pour éviter que Three.js ne plante avec des valeurs 'undefined'.
-    var _originalLoadJSONObject = window.app.loadJSONObject;
-    window.app.loadJSONObject = function(obj) {
-      if (obj && obj.layers) {
-        obj.layers.forEach(function(layer) {
-          if (layer.type === "dem" && layer.data) {
-            layer.data.forEach(function(block) {
-              if (block.grid && Array.isArray(block.grid.array) && block.grid.array.length === 0) {
-                var expectedSize = block.grid.width * block.grid.height;
-                // Remplit la grille de zéros (terrain plat sécurisé)
-                block.grid.array = new Array(expectedSize).fill(0);
-                console.warn("Q3D Sécurité : La couche '" + layer.properties.name + "' avait une grille vide. Remplie de 0.");
-              }
-            });
-          }
-        });
-      }
-      return _originalLoadJSONObject.call(window.app, obj);
-    };
-
-    // Chargement dynamique du fichier de données de la scène
-    dlog('info', 'Chargement du modèle 3D (scene.js)…');
-    // ... reste du code
+    
     // Chargement dynamique du fichier de données de la scène
     dlog('info', 'Chargement du modèle 3D (scene.js)…');
     var sceneScript = document.createElement('script');
