@@ -378,11 +378,46 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0a0f1a;font-family:
 #fonte-panel #infobtn::before{content:url("data:image/svg+xml;base64,PHN2ZyB2aWV3Qm94PSIwIDAgMTAwIDEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBjbGFzcz0ibGF5ZXIiIHN0cm9rZT0iIzAwMCI+PGNpcmNsZSBjeD0iNTAuMiIgY3k9IjUwIiByPSIzNiIgc3Ryb2tlLXdpZHRoPSIxMCIgZmlsbD0ibm9uZSIvPjxjaXJjbGUgY3g9IjUwIiBjeT0iMzAiIHI9IjUiLz48cGF0aCBkPSJNNDIgNDRoOHYyNW0tOCAyaDE2IiBzdHJva2Utd2lkdGg9IjgiIGZpbGw9Im5vbmUiLz48L2c+PC9zdmc+");}
 #fonte-panel .zoombtn::before{content:url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48ZyBjbGFzcz0ibGF5ZXIiIHN0cm9rZT0iIzAwMCIgZmlsbD0ibm9uZSI+PGNpcmNsZSBjeD0iNDIiIGN5PSI0MiIgcj0iMzMiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIHN0cm9rZS13aWR0aD0iOCIvPjxwYXRoIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLXdpZHRoPSIxNCIgZD0ibTY4IDY4IDE5IDE5Ii8+PHBhdGggc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2Utd2lkdGg9IjYiIGQ9Ik0yNyA0MWgzME00MiAyN3YzMCIvPjwvZz48L3N2Zz4=");}
   </style>
-  <!-- ── Qgis2threejs scripts (depuis GitHub raw) ── -->
-  <script src="https://raw.githubusercontent.com/Jeomatique/antarctique/main/threejs/three.min.js"></script>
-  <script src="https://raw.githubusercontent.com/Jeomatique/antarctique/main/threejs/OrbitControls.js"></script>
-  <script src="https://raw.githubusercontent.com/Jeomatique/antarctique/main/threejs/ViewHelper.js"></script>
-  <script src="https://raw.githubusercontent.com/Jeomatique/antarctique/main/Qgis2threejs.js"></script>
+  <!-- ── Qgis2threejs scripts : chargés via fetch pour contourner le Content-Type text/plain de raw.githubusercontent ── -->
+  <script>
+  var _Q3D_SCRIPTS=[
+    'https://raw.githubusercontent.com/Jeomatique/antarctique/main/threejs/three.min.js',
+    'https://raw.githubusercontent.com/Jeomatique/antarctique/main/threejs/OrbitControls.js',
+    'https://raw.githubusercontent.com/Jeomatique/antarctique/main/threejs/ViewHelper.js',
+    'https://raw.githubusercontent.com/Jeomatique/antarctique/main/Qgis2threejs.js'
+  ];
+  var _Q3D_ready=false;
+  var _Q3D_loading=false;
+  var _Q3D_callbacks=[];
+
+  function _loadQ3DScripts(cb){
+    if(_Q3D_ready){ cb(); return; }
+    if(cb) _Q3D_callbacks.push(cb);
+    if(_Q3D_loading) return;
+    _Q3D_loading=true;
+
+    function loadNext(i){
+      if(i>=_Q3D_SCRIPTS.length){
+        _Q3D_ready=true;
+        _Q3D_callbacks.forEach(function(fn){fn();});
+        _Q3D_callbacks=[];
+        return;
+      }
+      fetch(_Q3D_SCRIPTS[i])
+        .then(function(r){ return r.text(); })
+        .then(function(code){
+          var s=document.createElement('script');
+          s.textContent=code;
+          document.head.appendChild(s);
+          loadNext(i+1);
+        })
+        .catch(function(e){
+          console.error('Erreur chargement Q3D script :', _Q3D_SCRIPTS[i], e);
+        });
+    }
+    loadNext(0);
+  }
+  </script>
 </head>
 <body>
 
@@ -1759,31 +1794,35 @@ var _fonteInited=false;
 window.openFontePanel=function(){
   document.getElementById('fonte-panel').classList.add('open');
   if(_fonteInited) return;
-  _fonteInited=true;
 
-  // Qgis2threejs cherche getElementById('view') en interne
-  // On renomme temporairement #fonte-view → #view le temps de l'init,
-  // puis on remet l'ID original pour éviter les conflits CSS
+  // Affiche un message d'attente pendant le chargement des scripts
   var container=document.getElementById('fonte-view');
-  container.id='view';
+  container.innerHTML='<div style="color:#fff;font-family:monospace;padding:20px;font-size:.9rem;">Chargement du viewer 3D…</div>';
 
-  Q3D.Config.allVisible=true;
-  Q3D.Config.viewpoint={
-    lookAt:{x:-152571.7244957263,y:994820.3568497264,z:-6406.959576937564},
-    pos:{x:1704580.1978733256,y:-3164258.674118934,z:7145.18050437643}
-  };
-  Q3D.Config.localMode=true;
+  _loadQ3DScripts(function(){
+    _fonteInited=true;
+    container.innerHTML=''; // Vider le message d'attente
 
-  var app=Q3D.application;
-  app.init(container);
-  app.loadSceneFile(
-    'https://raw.githubusercontent.com/Jeomatique/antarctique/main/data/Fonte/scene.js',
-    function(scene){ app.start(); },
-    function(scene){}
-  );
+    // Qgis2threejs cherche getElementById('view') en interne
+    container.id='view';
 
-  // Remet l'ID d'origine pour que le CSS scoped #fonte-panel #fonte-view continue à s'appliquer
-  container.id='fonte-view';
+    Q3D.Config.allVisible=true;
+    Q3D.Config.viewpoint={
+      lookAt:{x:-152571.7244957263,y:994820.3568497264,z:-6406.959576937564},
+      pos:{x:1704580.1978733256,y:-3164258.674118934,z:7145.18050437643}
+    };
+    Q3D.Config.localMode=true;
+
+    var app=Q3D.application;
+    app.init(container);
+    app.loadSceneFile(
+      'https://raw.githubusercontent.com/Jeomatique/antarctique/main/data/Fonte/scene.js',
+      function(scene){ app.start(); },
+      function(scene){}
+    );
+
+    container.id='fonte-view';
+  });
 };
 window.closeFontePanel=function(){
   document.getElementById('fonte-panel').classList.remove('open');
