@@ -377,6 +377,21 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0a0f1a;font-family:
 #fonte-panel #layerbtn::before{content:url("data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIj8+Cjxzdmcgdmlld0JveD0iMCAwIDEwMCAxMDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6c3ZnPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CiA8ZyBjbGFzcz0ibGF5ZXIiPgogIDx0aXRsZT5MYXllciAxPC90aXRsZT4KICA8cGF0aCBkPSJtNTAsNDVsLTQwLDIwbDQwLDIwbDQwLC0yMGwtNDAsLTIweiIgZmlsbD0iI2ZmZmZmZiIgaWQ9InN2Z18xMCIgc3Ryb2tlPSIjMDAwMDAwIiBzdHJva2UtbGluZWpvaW49InJvdW5kIiBzdHJva2Utd2lkdGg9IjgiLz4KICA8cGF0aCBkPSJtNTAsMzBsLTQwLDIwbDQwLDIwbDQwLC0yMGwtNDAsLTIweiIgZmlsbD0iI2ZmZmZmZiIgaWQ9InN2Z185IiBzdHJva2U9IiMwMDAwMDAiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIHN0cm9rZS13aWR0aD0iOCIgdHJhbnNmb3JtPSJtYXRyaXgoMSAwIDAgMSAwIDApIi8+CiAgPHBhdGggZD0ibTUwLDE1bC00MCwyMGw0MCwyMGw0MCwtMjBsLTQwLC0yMHoiIGZpbGw9IiNmZmZmZmYiIGlkPSJzdmdfNCIgc3Ryb2tlPSIjMDAwMDAwIiBzdHJva2UtbGluZWpvaW49InJvdW5kIiBzdHJva2Utd2lkdGg9IjgiLz4KIDwvZz4KPC9zdmc+");}
 #fonte-panel #infobtn::before{content:url("data:image/svg+xml;base64,PHN2ZyB2aWV3Qm94PSIwIDAgMTAwIDEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBjbGFzcz0ibGF5ZXIiIHN0cm9rZT0iIzAwMCI+PGNpcmNsZSBjeD0iNTAuMiIgY3k9IjUwIiByPSIzNiIgc3Ryb2tlLXdpZHRoPSIxMCIgZmlsbD0ibm9uZSIvPjxjaXJjbGUgY3g9IjUwIiBjeT0iMzAiIHI9IjUiLz48cGF0aCBkPSJNNDIgNDRoOHYyNW0tOCAyaDE2IiBzdHJva2Utd2lkdGg9IjgiIGZpbGw9Im5vbmUiLz48L2c+PC9zdmc+");}
 #fonte-panel .zoombtn::before{content:url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48ZyBjbGFzcz0ibGF5ZXIiIHN0cm9rZT0iIzAwMCIgZmlsbD0ibm9uZSI+PGNpcmNsZSBjeD0iNDIiIGN5PSI0MiIgcj0iMzMiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIHN0cm9rZS13aWR0aD0iOCIvPjxwYXRoIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLXdpZHRoPSIxNCIgZD0ibTY4IDY4IDE5IDE5Ii8+PHBhdGggc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2Utd2lkdGg9IjYiIGQ9Ik0yNyA0MWgzME00MiAyN3YzMCIvPjwvZz48L3N2Zz4=");}
+#progressbar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 4px;
+  background: var(--teal, #00c8b4); /* Utilise votre couleur teal définie dans le thème */
+  width: 0%;
+  z-index: 9999;
+  transition: width 0.1s ease, opacity 0.5s ease;
+}
+
+/* Gère la disparition progressive une fois le chargement terminé */
+#progressbar.fadeout {
+  opacity: 0;
+}
   </style>
   <!-- ── Qgis2threejs : chargeur multi-stratégies avec diagnostics ── -->
   <script>
