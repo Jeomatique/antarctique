@@ -294,7 +294,35 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0a0f1a;font-family:
     #dbg-log::-webkit-scrollbar-thumb{background:rgba(0,200,180,.25);border-radius:3px;}
     .dl{line-height:1.45;word-break:break-all;padding-bottom:1px;border-bottom:1px solid rgba(255,255,255,.03);}
     .dl.i{color:#7af0d0;}.dl.w{color:#f0c87a;}.dl.e{color:#f07a7a;}.dl.ok{color:#7af07a;}
+    /* ── PANNEAU FONTE ─────────────────────────── */
+    #fonte-panel{
+      position:fixed;inset:0;z-index:1500;
+      background:#000;
+      display:none;flex-direction:column;
+    }
+    #fonte-panel.open{display:flex;}
+    #fonte-close{
+      position:fixed;top:12px;left:12px;z-index:1700;
+      background:rgba(0,0,0,.75);border:1px solid rgba(255,255,255,.25);
+      color:#fff;font-family:'Courier New',monospace;font-size:.72rem;
+      letter-spacing:1px;padding:6px 14px;border-radius:4px;cursor:pointer;
+      transition:background .2s,border-color .2s;backdrop-filter:blur(6px);
+    }
+    #fonte-close:hover{background:rgba(255,255,255,.15);border-color:rgba(255,255,255,.5);}
+    #fonte-view-wrap{position:relative;width:100%;height:100%;flex:1;}
+    /* Le viewer Q3D s'accroche à #view — on le remplace par fonte-view */
+    #fonte-view{position:absolute;inset:0;overflow:hidden;}
+    /* Surcharge Qgis2threejs CSS : popup et layerpanel décalés pour ne pas masquer le bouton fermer */
+    #fonte-panel #popup,
+    #fonte-panel #header,
+    #fonte-panel #layerpanel{ left:36px; }
   </style>
+  <!-- ── Qgis2threejs / three.js (pour le panneau Fonte) ── -->
+  <link rel="stylesheet" type="text/css" href="https://raw.githubusercontent.com/Jeomatique/antarctique/main/Qgis2threejs.css">
+  <script src="https://raw.githubusercontent.com/Jeomatique/antarctique/main/threejs/three.min.js"></script>
+  <script src="https://raw.githubusercontent.com/Jeomatique/antarctique/main/threejs/OrbitControls.js"></script>
+  <script src="https://raw.githubusercontent.com/Jeomatique/antarctique/main/threejs/ViewHelper.js"></script>
+  <script src="https://raw.githubusercontent.com/Jeomatique/antarctique/main/Qgis2threejs.js"></script>
 </head>
 <body>
 
@@ -372,7 +400,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0a0f1a;font-family:
       <!-- Cercles thématiques -->
       <div style="display:flex;gap:8px;">
         <div class="theme-circle tc-final" id="tc-final" onclick="selectTheme('final',this)">Final</div>
-        <div class="theme-circle tc-fonte" id="tc-fonte" onclick="openFonte()">Fonte</div>
+        <div class="theme-circle tc-fonte" id="tc-fonte" onclick="openFontePanel()">Fonte</div>
       </div>
     </div>
   </div>
@@ -418,6 +446,86 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0a0f1a;font-family:
     </div>
     <img id="legend-box-img" style="display:none;max-width:200px;margin-top:8px;border-radius:6px;" src="" alt="Légende"/>
   </div>
+
+  <!-- ═══ PANNEAU FONTE (intégré) ═══════════════ -->
+  <div id="fonte-panel">
+    <button id="fonte-close" onclick="closeFontePanel()">✕ Fermer</button>
+
+    <!-- Contenu de Fonte.html intégré -->
+    <div id="fonte-view-wrap">
+      <div id="fonte-view">
+        <div id="northarrow"></div>
+        <div id="navigation"></div>
+      </div>
+
+      <div id="popup">
+        <div id="closebtn">&times;</div>
+        <div id="popupbar"></div>
+        <div id="popupbody">
+          <div id="popupcontent"></div>
+          <div id="queryresult">
+            <table id="qr_coords_table">
+              <caption>Clicked coordinates <div id="zoomtopoint" class="action-zoom zoombtn"></div></caption>
+              <tr><td id="qr_coords"></td></tr>
+            </table>
+            <table id="qr_layername_table">
+              <caption>Layer <div id="zoomtolayer" class="action-zoom zoombtn"></div></caption>
+              <tr><td id="qr_layername"></td></tr>
+            </table>
+            <table id="qr_attrs_table"><caption>Attributes</caption></table>
+            <div id="orbitbtn" class="action-btn action-orbit">Orbit</div>
+            <div id="measurebtn" class="action-btn">Measure distance</div>
+          </div>
+          <div id="pageinfo">
+            <h1>Current View URL</h1>
+            <div><input id="urlbox" type="text"></div>
+            <h1>Usage</h1>
+            <table id="usage">
+              <tr><td colspan="2" class="star">Mouse</td></tr>
+              <tr><td>Left button + Move</td><td>Orbit</td></tr>
+              <tr><td>Mouse Wheel</td><td>Zoom</td></tr>
+              <tr><td>Right button + Move</td><td>Pan</td></tr>
+              <tr><td colspan="2" class="star">Keys</td></tr>
+              <tr><td>Arrow keys</td><td>Move Horizontally</td></tr>
+              <tr><td>Shift + Arrow keys</td><td>Orbit</td></tr>
+              <tr><td>Ctrl + Arrow keys</td><td>Rotate</td></tr>
+              <tr><td>Shift + Ctrl + Up / Down</td><td>Zoom In / Out</td></tr>
+              <tr><td>L</td><td>Toggle Label Visibility</td></tr>
+              <tr><td>R</td><td>Start / Stop Orbit Animation</td></tr>
+              <tr><td>W</td><td>Wireframe Mode</td></tr>
+              <tr><td>Shift + R</td><td>Reset Camera Position</td></tr>
+              <tr><td>Shift + S</td><td>Save Image</td></tr>
+            </table>
+            <h1>About</h1>
+            <div id="about">
+              This page was made with <a href="https://www.qgis.org/" target="_blank">QGIS</a> and <a href="https://github.com/minorua/Qgis2threejs" target="_blank">Qgis2threejs</a> plugin (version 2.8).
+              <div>Powered by <a href="https://threejs.org/" target="_blank">three.js</a><span id="lib_proj4js"> and <a href="https://trac.osgeo.org/proj4js/" target="_blank">Proj4js</a></span>.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="progress"><div id="progressbar"></div></div>
+
+      <div id="toolbtns">
+        <div id="layerbtn"></div>
+        <div id="animbtn" class="hidden"></div>
+        <div id="infobtn"></div>
+      </div>
+
+      <div id="header"></div>
+      <div id="footer"></div>
+
+      <div id="layerpanel">
+        <div id="layerlist"></div>
+      </div>
+
+      <div id="narrativebox" class="ef1">
+        <div id="narbody"></div>
+        <div id="nextbtn"></div>
+      </div>
+    </div><!-- fin fonte-view-wrap -->
+  </div><!-- fin fonte-panel -->
 
   <!-- Footer bandeau -->
   <div id="footer-bar">
@@ -1586,9 +1694,27 @@ function selectAny(type, id, el){
 }
 window.selectTheme=function(id,el){ selectAny('theme',id,el); };
 
-// Fonte : ouvre Fonte.html dans une nouvelle fenêtre
-window.openFonte=function(){
-  window.open('Fonte.html','_blank');
+// Fonte : panneau plein écran avec viewer Q3D intégré
+var _fonteInited=false;
+window.openFontePanel=function(){
+  document.getElementById('fonte-panel').classList.add('open');
+  if(_fonteInited) return;
+  _fonteInited=true;
+  // Initialise Q3D sur le conteneur #fonte-view
+  var container=document.getElementById('fonte-view');
+  var app=Q3D.application;
+  var gui=Q3D.gui;
+  Q3D.Config.allVisible=true;
+  Q3D.Config.viewpoint={lookAt:{x:-152571.7244957263,y:994820.3568497264,z:-6406.959576937564},pos:{x:1704580.1978733256,y:-3164258.674118934,z:7145.18050437643}};
+  Q3D.Config.localMode=true;
+  app.init(container);
+  app.loadSceneFile('https://raw.githubusercontent.com/Jeomatique/antarctique/main/data/Fonte/scene.js',
+    function(scene){ app.start(); },
+    function(scene){}
+  );
+};
+window.closeFontePanel=function(){
+  document.getElementById('fonte-panel').classList.remove('open');
 };
 </script>
 </body>
