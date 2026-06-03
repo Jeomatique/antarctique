@@ -309,6 +309,8 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0a0f1a;font-family:
       transition:background .2s,border-color .2s;backdrop-filter:blur(6px);
     }
     #fonte-close:hover{background:rgba(255,255,255,.15);border-color:rgba(255,255,255,.5);}
+    /* Masquer le menu hamburger de l'app principale quand le panneau Fonte est ouvert */
+    body.fonte-open #menu-btn{ display:none!important; }
     #fonte-view-wrap{position:relative;width:100%;height:100%;flex:1;overflow:hidden;}
     /* IMPORTANT : cibler UNIQUEMENT le conteneur du viewer (renommé #view à l'init),
        PAS tous les divs — sinon popup/layerpanel/narrativebox s'étirent en plein écran
@@ -347,7 +349,8 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0a0f1a;font-family:
 #fonte-panel #toolbtns>div{background-color:white;width:24px;height:24px;padding:6px;cursor:pointer;}
 #fonte-panel #toolbtns>div:hover{background-color:#eee;}
 #fonte-panel #toolbtns>div::before{opacity:.6;}
-#fonte-panel #layerpanel{position:absolute;margin:1px 2px;background-color:white;box-shadow:1px 2px 6px rgba(0,0,0,.2);z-index:1000;display:none;}
+#fonte-panel #layerpanel{position:absolute;margin:1px 2px;background-color:white;box-shadow:1px 2px 6px rgba(0,0,0,.2);z-index:1000;display:none;color:#000;}
+#fonte-panel #layerpanel *{color:#000;}
 #fonte-panel .layer{padding:6px;}
 #fonte-panel .layer>div{display:flex;align-items:center;margin-bottom:3px;font-size:small;}
 #fonte-panel .layer>div:nth-child(n+2){margin-left:20px;font-size:xx-small;}
@@ -1551,7 +1554,8 @@ function initApp(){
       var p=stages[0].coords[0],st=stages[0];
       initBoat(p[0],p[1],st.boatHeight,st.boatZ);
       buildTrailGfx(st.boatHeight);
-      view.goTo({position:{longitude:p[0],latitude:p[1],z:800000},tilt:40},{duration:3500});
+      // Vue globale : toute la Terre vue depuis l'océan Atlantique (pas de zoom sur le bateau)
+      view.goTo({position:{longitude:-30,latitude:0,z:24000000},tilt:0,heading:0},{duration:3500});
       document.getElementById('btnPlay').textContent='▶ Lancer';
     }
 
@@ -1600,7 +1604,7 @@ function initApp(){
       textLabels.forEach(function(lbl){var st=labelStates[lbl.text];if(st&&st.opacity!==0){st.opacity=0;updateTextLabel(lbl,0);}});
       updateTrail(); updateIcones(-1,null,null);
       citFeats.forEach(function(f){hideCitation(f);});
-      if(stages.length){var p=stages[0].coords[0],st=stages[0];moveBoat(p[0],p[1],0,st.boatHeight,st.boatZ);view.goTo({position:{longitude:p[0],latitude:p[1],z:800000},tilt:40},{duration:1200});}
+      if(stages.length){var p=stages[0].coords[0],st=stages[0];moveBoat(p[0],p[1],0,st.boatHeight,st.boatZ);view.goTo({position:{longitude:-30,latitude:0,z:24000000},tilt:0,heading:0},{duration:1200});}
       viewOffset=0;renderViewport();
     };
     window.launchStage=function(idx){
@@ -1930,6 +1934,7 @@ window.selectTheme=function(id,el){ selectAny('theme',id,el); };
 var _fonteInited=false;
 window.openFontePanel=function(){
   document.getElementById('fonte-panel').classList.add('open');
+  document.body.classList.add('fonte-open');
   if(_fonteInited) return;
 
   // Affiche un message d'attente pendant le chargement des scripts
@@ -2001,6 +2006,7 @@ window.openFontePanel=function(){
 };
 window.closeFontePanel=function(){
   document.getElementById('fonte-panel').classList.remove('open');
+  document.body.classList.remove('fonte-open');
 };
 </script>
 </body>
