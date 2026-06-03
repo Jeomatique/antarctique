@@ -463,30 +463,46 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0a0f1a;font-family:
     });
   }
 
-  function _loadQ3DScripts(cb){
-    if(_Q3D_ready){ cb(); return; }
-    if(cb) _Q3D_callbacks.push(cb);
-    if(_Q3D_loading) return;
-    _Q3D_loading=true;
-
-    _d('info','═══ Chargement des scripts 3D ═══');
-
-    _loadOne(BASE_Q3D+'threejs/three.min.js','THREE')
-      .then(function(){ return _loadOne(BASE_Q3D+'threejs/OrbitControls.js',null); })
-      .then(function(){ return _loadOne(BASE_Q3D+'threejs/ViewHelper.js',null); })
-      .then(function(){ return _loadOne(BASE_Q3D+'Qgis2threejs.js','Q3D'); })
-      .then(function(){
-        _d('ok','═══ Tous les scripts chargés ✓ ═══');
-        _Q3D_ready=true; _Q3D_loading=false;
-        _Q3D_callbacks.forEach(function(fn){ fn(); });
-        _Q3D_callbacks=[];
-      })
-      .catch(function(e){
-        _Q3D_loading=false;
-        _d('err','ÉCHEC : '+e.message);
-        var c=document.getElementById('fonte-view');
-        if(c) c.innerHTML='<div style="color:#f55;padding:20px;font-family:monospace;font-size:.8rem;line-height:1.5">Erreur chargement 3D :<br>'+e.message+'<br><br>Ouvre le panneau DEBUG pour le détail.</div>';
-      });
+  function _loadQ3DScripts(callback) {
+    // Liste des scripts avec de VRAIS chemins relatifs locaux
+    var scripts = [
+      "./threejs/three.min.js",
+      "./threejs/OrbitControls.js",
+      "./threejs/ViewHelper.js",
+      "./Qgis2threejs.js"
+    ];
+  
+    var index = 0;
+  
+    function loadNext() {
+      if (index >= scripts.length) {
+        dlog('success', '═══ Tous les scripts 3D sont chargés ! ═══');
+        callback();
+        return;
+      }
+  
+      var url = scripts[index];
+      dlog('info', 'Insertion balise script : ' + url);
+  
+      var script = document.createElement('script');
+      script.src = url;
+      script.async = false; // Force le navigateur à les exécuter dans l'ordre exact
+  
+      script.onload = function() {
+        dlog('success', '↳ Chargé avec succès');
+        index++;
+        loadNext();
+      };
+  
+      script.onerror = function() {
+        dlog('err', '↳ ÉCHEC de l\'insertion du script : ' + url);
+      };
+  
+      document.head.appendChild(script);
+    }
+  
+    dlog('info', '═══ Début du chargement des scripts 3D locaux ═══');
+    loadNext();
   }
   </script>
 </head>
