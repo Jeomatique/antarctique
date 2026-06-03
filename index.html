@@ -1947,10 +1947,12 @@ window.openFontePanel=function(){
     };
     Q3D.Config.localMode=true;
 
-    var app=Q3D.application;
-    app.init(container);
+    // CORRECTION ICI : On attache 'app' à 'window' pour qu'elle devienne globale.
+    // Ainsi, le fichier scene.js pourra y accéder sans problème.
+    window.app = Q3D.application;
+    window.app.init(container);
 
-    // ── VRAIE MÉTHODE : Chargement dynamique du fichier de données de la scène ──
+    // Chargement dynamique du fichier de données de la scène
     dlog('info', 'Chargement du modèle 3D (scene.js)…');
     var sceneScript = document.createElement('script');
     sceneScript.src = "./data/Fonte/scene.js";
