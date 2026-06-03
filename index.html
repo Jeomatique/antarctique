@@ -462,13 +462,13 @@ function pgwPtToWGS84(cx,cy,pixelSizeA){
 }
 
 var EXPLORERS = [
-  { id:'urville',  label:'Dumont d\'Urville',
-    geo:GH+'urville.geojson', text:GH+'urville_texte.geojson',
-    portrait:GH+'urville.png',
-    icone:GH+'urville_icone_info.geojson',
-    citation:GH+'urville_citation.geojson' }
+  { id:'charcot',  label:'Jean-Baptiste Charcot',
+    geo:GH+'charcot.geojson', text:GH+'charcot_texte.geojson',
+    portrait:GH+'charcot.png',
+    icone:GH+'charcot_icone_info.geojson',
+    citation:GH+'charcot_citation.geojson' }
 ];
-var activeExplorer = 'urville';
+var activeExplorer = 'charcot';
 
 var NB_HAUT=8, NB_BAS=8;
 var STEP_DURATION_S=20, TRAIL_MAX_KM=200, PAUSE_BETWEEN_S=3;
@@ -1376,7 +1376,8 @@ function initApp(){
     // ── Thème FINAL ───────────────────────────────
     function loadFinal(){
       var srcs=[
-        {geo:GH+'urville_texte.geojson', img:GH+'urville_nuage.png', pgw:GH+'urville_nuage.pgw'}
+        {geo:GH+'urville_texte.geojson', img:GH+'urville_nuage.png', pgw:GH+'urville_nuage.pgw'},
+        {geo:GH+'charcot_texte.geojson', img:GH+'charcot_nuage.png', pgw:GH+'charcot_nuage.pgw'}
       ];
       srcs.forEach(function(src){
         // Lignes colorées par classe
