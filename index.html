@@ -317,8 +317,68 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0a0f1a;font-family:
     #fonte-panel #header,
     #fonte-panel #layerpanel{ left:36px; }
   </style>
-  <!-- ── Qgis2threejs / three.js (pour le panneau Fonte) ── -->
-  <link rel="stylesheet" type="text/css" href="https://raw.githubusercontent.com/Jeomatique/antarctique/main/Qgis2threejs.css">
+  <!-- ── Qgis2threejs CSS intégré (raw.githubusercontent ne sert pas le bon Content-Type) ── -->
+  <style>
+/* Qgis2threejs.css — (C) 2014 Minoru Akagi — MIT */
+#fonte-view-wrap body{font-family:arial,sans-serif;margin:0;overflow:hidden;}
+#fonte-view{position:absolute;width:100%;height:100%;}
+#fonte-view.sky{background:linear-gradient(to bottom,#98c8f6 0%,#cbebff 40%,#f0f9ff 100%);}
+#fonte-panel .hidden{display:none!important;}
+#fonte-panel .visible{display:block!important;}
+#fonte-panel .clickable{cursor:pointer;}
+#fonte-panel .no-events{pointer-events:none;}
+#fonte-panel #progress{position:absolute;top:0;left:0;width:100%;height:5px;}
+#fonte-panel #progressbar{width:0;height:5px;background-color:#2196F3;opacity:1;}
+#fonte-panel #progressbar.fadeout{opacity:0;height:0;transition:all .4s;}
+#fonte-panel #toolbtns{position:absolute;margin:1px;box-shadow:1px 2px 6px rgba(0,0,0,.2);float:left;}
+#fonte-panel #toolbtns>div{background-color:white;width:24px;height:24px;padding:6px;cursor:pointer;}
+#fonte-panel #toolbtns>div:hover{background-color:#eee;}
+#fonte-panel #toolbtns>div::before{opacity:.6;}
+#fonte-panel #layerpanel{position:absolute;margin:1px 2px;background-color:white;box-shadow:1px 2px 6px rgba(0,0,0,.2);z-index:1000;display:none;}
+#fonte-panel .layer{padding:6px;}
+#fonte-panel .layer>div{display:flex;align-items:center;margin-bottom:3px;font-size:small;}
+#fonte-panel .layer>div:nth-child(n+2){margin-left:20px;font-size:xx-small;}
+#fonte-panel .layer input[type="range"]{width:130px;background-color:lightgray;}
+#fonte-panel .layer select{width:130px;}
+#fonte-panel #header{position:absolute;margin:5px 10px;}
+#fonte-panel #footer{position:absolute;left:5px;bottom:5px;}
+#fonte-panel #popup{position:absolute;margin:1px 2px;max-width:480px;min-width:300px;z-index:9999;background-color:white;box-shadow:1px 2px 6px rgba(0,0,0,.2);display:none;}
+#fonte-panel #popupbar{padding-left:4px;height:19px;border-bottom:1px solid lightgray;border-radius:3px 3px 0 0;}
+#fonte-panel #closebtn{color:#ccc;padding:2px;line-height:16px;font-size:16px;font-weight:bold;width:16px;height:16px;text-align:center;float:right;cursor:pointer;}
+#fonte-panel #closebtn:hover{background-color:#eee;}
+#fonte-panel #popupbody{padding:0 5px 5px;min-width:290px;max-height:500px;overflow:auto;}
+#fonte-panel #popupcontent,#fonte-panel #queryresult{display:none;}
+#fonte-panel #popupbody table{margin:4px 0;width:100%;}
+#fonte-panel #popupbody table caption{background-color:gray;color:white;font-size:small;padding:1px 1px 1px 6px;text-align:left;vertical-align:bottom;}
+#fonte-panel #popupbody table td{padding-left:5px;}
+#fonte-panel #qr_layername_table tr,#fonte-panel #qr_coords_table tr{background-color:#eee;}
+#fonte-panel #qr_attrs_table tr:nth-child(odd){background-color:#eee;}
+#fonte-panel #qr_attrs_table tr td:first-child{width:40%;}
+#fonte-panel .action-zoom{cursor:pointer;float:right;padding:0 1px 0;width:15px;height:15px;filter:invert(100%);}
+#fonte-panel .action-zoom:hover{background-color:#eee;border-radius:3px;filter:none;}
+#fonte-panel .action-btn{display:inline-block;border:1px solid lightgray;cursor:pointer;font-size:small;padding:2px 4px;margin-left:2px;}
+#fonte-panel .action-btn:hover{background-color:#eee;}
+#fonte-panel #pageinfo{font-size:small;display:none;}
+#fonte-panel #pageinfo>h1{background-color:gray;color:white;font-size:small;font-weight:normal;margin-top:5px;margin-bottom:3px;padding:1px 1px 1px 6px;}
+#fonte-panel #urlbox{width:98%;}
+#fonte-panel #usage,#fonte-panel #about{margin-left:5px;}
+#fonte-panel #usage tr:nth-child(odd){background-color:#eee;}
+#fonte-panel #usage td.star{font-weight:bold;}
+#fonte-panel #about img{float:left;margin-right:5px;width:24px;height:24px;}
+#fonte-panel #northarrow{position:absolute;left:12px;bottom:16px;width:80px;height:80px;z-index:1000;pointer-events:none;display:none;}
+#fonte-panel #navigation{position:absolute;right:0;bottom:0;width:128px;height:128px;z-index:1000;display:none;}
+#fonte-panel #narrativebox{position:absolute;z-index:1001;left:2px;top:2px;max-width:40%;max-height:80%;min-width:200px;border:1px solid gray;border-radius:2px;background-color:rgba(255,255,255,.95);box-shadow:5px 5px 5px rgba(0,0,0,.2);padding:8px;overflow:auto;}
+#fonte-panel #narrativebox.ef1{top:90%;height:0;opacity:0;}
+#fonte-panel #narrativebox.ef1.visible{transition:all ease-out .2s;top:2px;height:auto;opacity:1;}
+#fonte-panel #narbody{width:100%;min-height:75px;}
+#fonte-panel #narbody>.narcontent{display:none;}
+#fonte-panel #nextbtn{float:right;padding:4px 8px;border:1px solid gray;border-radius:2px;font-size:small;cursor:pointer;}
+#fonte-panel #nextbtn:hover{background-color:#eee;}
+#fonte-panel #layerbtn::before{content:url("data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIj8+Cjxzdmcgdmlld0JveD0iMCAwIDEwMCAxMDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6c3ZnPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CiA8ZyBjbGFzcz0ibGF5ZXIiPgogIDx0aXRsZT5MYXllciAxPC90aXRsZT4KICA8cGF0aCBkPSJtNTAsNDVsLTQwLDIwbDQwLDIwbDQwLC0yMGwtNDAsLTIweiIgZmlsbD0iI2ZmZmZmZiIgaWQ9InN2Z18xMCIgc3Ryb2tlPSIjMDAwMDAwIiBzdHJva2UtbGluZWpvaW49InJvdW5kIiBzdHJva2Utd2lkdGg9IjgiLz4KICA8cGF0aCBkPSJtNTAsMzBsLTQwLDIwbDQwLDIwbDQwLC0yMGwtNDAsLTIweiIgZmlsbD0iI2ZmZmZmZiIgaWQ9InN2Z185IiBzdHJva2U9IiMwMDAwMDAiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIHN0cm9rZS13aWR0aD0iOCIgdHJhbnNmb3JtPSJtYXRyaXgoMSAwIDAgMSAwIDApIi8+CiAgPHBhdGggZD0ibTUwLDE1bC00MCwyMGw0MCwyMGw0MCwtMjBsLTQwLC0yMHoiIGZpbGw9IiNmZmZmZmYiIGlkPSJzdmdfNCIgc3Ryb2tlPSIjMDAwMDAwIiBzdHJva2UtbGluZWpvaW49InJvdW5kIiBzdHJva2Utd2lkdGg9IjgiLz4KIDwvZz4KPC9zdmc+");}
+#fonte-panel #infobtn::before{content:url("data:image/svg+xml;base64,PHN2ZyB2aWV3Qm94PSIwIDAgMTAwIDEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBjbGFzcz0ibGF5ZXIiIHN0cm9rZT0iIzAwMCI+PGNpcmNsZSBjeD0iNTAuMiIgY3k9IjUwIiByPSIzNiIgc3Ryb2tlLXdpZHRoPSIxMCIgZmlsbD0ibm9uZSIvPjxjaXJjbGUgY3g9IjUwIiBjeT0iMzAiIHI9IjUiLz48cGF0aCBkPSJNNDIgNDRoOHYyNW0tOCAyaDE2IiBzdHJva2Utd2lkdGg9IjgiIGZpbGw9Im5vbmUiLz48L2c+PC9zdmc+");}
+#fonte-panel .zoombtn::before{content:url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48ZyBjbGFzcz0ibGF5ZXIiIHN0cm9rZT0iIzAwMCIgZmlsbD0ibm9uZSI+PGNpcmNsZSBjeD0iNDIiIGN5PSI0MiIgcj0iMzMiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIHN0cm9rZS13aWR0aD0iOCIvPjxwYXRoIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLXdpZHRoPSIxNCIgZD0ibTY4IDY4IDE5IDE5Ii8+PHBhdGggc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2Utd2lkdGg9IjYiIGQ9Ik0yNyA0MWgzME00MiAyN3YzMCIvPjwvZz48L3N2Zz4=");}
+  </style>
+  <!-- ── Qgis2threejs scripts (depuis GitHub raw) ── -->
   <script src="https://raw.githubusercontent.com/Jeomatique/antarctique/main/threejs/three.min.js"></script>
   <script src="https://raw.githubusercontent.com/Jeomatique/antarctique/main/threejs/OrbitControls.js"></script>
   <script src="https://raw.githubusercontent.com/Jeomatique/antarctique/main/threejs/ViewHelper.js"></script>
@@ -1700,18 +1760,30 @@ window.openFontePanel=function(){
   document.getElementById('fonte-panel').classList.add('open');
   if(_fonteInited) return;
   _fonteInited=true;
-  // Initialise Q3D sur le conteneur #fonte-view
+
+  // Qgis2threejs cherche getElementById('view') en interne
+  // On renomme temporairement #fonte-view → #view le temps de l'init,
+  // puis on remet l'ID original pour éviter les conflits CSS
   var container=document.getElementById('fonte-view');
-  var app=Q3D.application;
-  var gui=Q3D.gui;
+  container.id='view';
+
   Q3D.Config.allVisible=true;
-  Q3D.Config.viewpoint={lookAt:{x:-152571.7244957263,y:994820.3568497264,z:-6406.959576937564},pos:{x:1704580.1978733256,y:-3164258.674118934,z:7145.18050437643}};
+  Q3D.Config.viewpoint={
+    lookAt:{x:-152571.7244957263,y:994820.3568497264,z:-6406.959576937564},
+    pos:{x:1704580.1978733256,y:-3164258.674118934,z:7145.18050437643}
+  };
   Q3D.Config.localMode=true;
+
+  var app=Q3D.application;
   app.init(container);
-  app.loadSceneFile('https://raw.githubusercontent.com/Jeomatique/antarctique/main/data/Fonte/scene.js',
+  app.loadSceneFile(
+    'https://raw.githubusercontent.com/Jeomatique/antarctique/main/data/Fonte/scene.js',
     function(scene){ app.start(); },
     function(scene){}
   );
+
+  // Remet l'ID d'origine pour que le CSS scoped #fonte-panel #fonte-view continue à s'appliquer
+  container.id='fonte-view';
 };
 window.closeFontePanel=function(){
   document.getElementById('fonte-panel').classList.remove('open');
