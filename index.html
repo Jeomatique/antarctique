@@ -1913,7 +1913,6 @@ function selectAny(type, id, el){
   }
 }
 window.selectTheme=function(id,el){ selectAny('theme',id,el); };
-
 // Fonte : panneau plein écran avec viewer Q3D intégré
 var _fonteInited=false;
 window.openFontePanel=function(){
@@ -1926,7 +1925,15 @@ window.openFontePanel=function(){
 
   _loadQ3DScripts(function(){
     _fonteInited=true;
-    container.innerHTML=''; // Vider le message d'attente
+
+    // CORRECTION CRUCIALE : On vide le texte de chargement ET on injecte proprement
+    // les éléments DOM exigés par Qgis2threejs afin qu'ils soient présents au moment de l'init.
+    container.innerHTML = `
+      <div id="viewhelper"></div>
+      <div id="progressbar"></div>
+      <div id="northarrow"></div>
+      <div id="navigation"></div>
+    `;
 
     dlog('info','Init Q3D…');
     if(typeof Q3D==='undefined'){ dlog('err','Q3D toujours indéfini après chargement'); return; }
@@ -1944,16 +1951,8 @@ window.openFontePanel=function(){
     var app=Q3D.application;
     app.init(container);
 
-    // scene.js est aussi servi en text/plain par GitHub → on le récupère via fetch
-    // puis on l'exécute, car loadSceneFile interne pourrait échouer sur le MIME.
-    var sceneUrl=BASE_Q3D+'data/Fonte/scene.js';
-    dlog('info','Chargement scene.js…');
-    app.loadSceneFile(sceneUrl,
-      function(scene){ dlog('ok','scene.js chargé — démarrage'); app.start(); },
-      function(scene){ dlog('ok','Scène complète'); }
-    );
-
-    container.id='fonte-view';
+    // Charger la scène
+    loadScene();
   });
 };
 window.closeFontePanel=function(){
