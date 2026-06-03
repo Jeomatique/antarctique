@@ -302,7 +302,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0a0f1a;font-family:
     }
     #fonte-panel.open{display:flex;}
     #fonte-close{
-      position:fixed;top:12px;left:12px;z-index:1700;
+      position:fixed;top:12px;right:12px;z-index:1700;
       background:rgba(0,0,0,.75);border:1px solid rgba(255,255,255,.25);
       color:#fff;font-family:'Courier New',monospace;font-size:.72rem;
       letter-spacing:1px;padding:6px 14px;border-radius:4px;cursor:pointer;
@@ -310,9 +310,11 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0a0f1a;font-family:
     }
     #fonte-close:hover{background:rgba(255,255,255,.15);border-color:rgba(255,255,255,.5);}
     #fonte-view-wrap{position:relative;width:100%;height:100%;flex:1;overflow:hidden;}
-    /* Le viewer Q3D s'accroche à #view — le conteneur est renommé #view→#fonte-view à l'init.
-       On cible le conteneur direct pour qu'il remplisse toujours tout l'espace. */
-    #fonte-view-wrap > div{
+    /* IMPORTANT : cibler UNIQUEMENT le conteneur du viewer (renommé #view à l'init),
+       PAS tous les divs — sinon popup/layerpanel/narrativebox s'étirent en plein écran
+       et bloquent les clics souris (caméra figée). */
+    #fonte-view-wrap > #fonte-view,
+    #fonte-view-wrap > #view{
       position:absolute!important;
       top:0;left:0;right:0;bottom:0;
       width:100%!important;height:100%!important;
@@ -326,13 +328,10 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0a0f1a;font-family:
     #fonte-view-wrap{
       background:linear-gradient(to bottom,#98c8f6 0%,#cbebff 40%,#f0f9ff 100%);
     }
-    #fonte-view-wrap > div.sky{
+    #fonte-view-wrap > #view.sky,
+    #fonte-view-wrap > #fonte-view.sky{
       background:linear-gradient(to bottom,#98c8f6 0%,#cbebff 40%,#f0f9ff 100%);
     }
-    /* Surcharge Qgis2threejs CSS : popup et layerpanel décalés pour ne pas masquer le bouton fermer */
-    #fonte-panel #popup,
-    #fonte-panel #header,
-    #fonte-panel #layerpanel{ left:36px; }
   </style>
   <!-- ── Qgis2threejs CSS intégré (raw.githubusercontent ne sert pas le bon Content-Type) ── -->
   <style>
