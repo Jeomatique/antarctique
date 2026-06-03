@@ -378,46 +378,114 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0a0f1a;font-family:
 #fonte-panel #infobtn::before{content:url("data:image/svg+xml;base64,PHN2ZyB2aWV3Qm94PSIwIDAgMTAwIDEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBjbGFzcz0ibGF5ZXIiIHN0cm9rZT0iIzAwMCI+PGNpcmNsZSBjeD0iNTAuMiIgY3k9IjUwIiByPSIzNiIgc3Ryb2tlLXdpZHRoPSIxMCIgZmlsbD0ibm9uZSIvPjxjaXJjbGUgY3g9IjUwIiBjeT0iMzAiIHI9IjUiLz48cGF0aCBkPSJNNDIgNDRoOHYyNW0tOCAyaDE2IiBzdHJva2Utd2lkdGg9IjgiIGZpbGw9Im5vbmUiLz48L2c+PC9zdmc+");}
 #fonte-panel .zoombtn::before{content:url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48ZyBjbGFzcz0ibGF5ZXIiIHN0cm9rZT0iIzAwMCIgZmlsbD0ibm9uZSI+PGNpcmNsZSBjeD0iNDIiIGN5PSI0MiIgcj0iMzMiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIHN0cm9rZS13aWR0aD0iOCIvPjxwYXRoIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLXdpZHRoPSIxNCIgZD0ibTY4IDY4IDE5IDE5Ii8+PHBhdGggc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2Utd2lkdGg9IjYiIGQ9Ik0yNyA0MWgzME00MiAyN3YzMCIvPjwvZz48L3N2Zz4=");}
   </style>
-  <!-- ── Qgis2threejs : chargement séquentiel garanti via fetch + script inline ── -->
+  <!-- ── Qgis2threejs : chargeur multi-stratégies avec diagnostics ── -->
   <script>
   var _Q3D_ready=false;
   var _Q3D_loading=false;
   var _Q3D_callbacks=[];
+  var BASE_Q3D='https://raw.githubusercontent.com/Jeomatique/antarctique/main/';
 
-  // Fonction pour injecter proprement un script local de manière séquentielle
-  function _injectScriptLocally(url) {
-    return new Promise(function(resolve, reject) {
-      var script = document.createElement('script');
-      script.src = url;
-      script.async = false; // TRÈS IMPORTANT : force l'exécution dans l'ordre d'insertion
-      script.onload = function() { resolve(); };
-      script.onerror = function() { reject(new Error("Échec du chargement de " + url)); };
-      document.head.appendChild(script);
+  // dlog peut ne pas être défini encore au tout début → wrapper sûr
+  function _d(type,msg){ if(typeof dlog==='function') dlog(type,msg); else console.log('['+type+'] '+msg); }
+
+  // Récupère le texte d'un script (fetch — contourne le Content-Type text/plain de GitHub)
+  function _getText(url){
+    _d('info','Fetch : '+url.replace(BASE_Q3D,''));
+    return fetch(url).then(function(r){
+      if(!r.ok) throw new Error('HTTP '+r.status+' sur '+url);
+      _d('ok','  ↳ '+r.status+' OK ('+(r.headers.get('content-type')||'?')+')');
+      return r.text();
     });
   }
-  
-  function _loadQ3DScripts(callback) {
-    // On charge les scripts l'un après l'autre (ordre crucial pour Three.js)
-    _injectScriptLocally("./threejs/three.min.js")
-      .then(function() {
-        return _injectScriptLocally("./threejs/OrbitControls.js");
+
+  // STRATÉGIE 1 : Blob avec MIME application/javascript forcé
+  function _injectViaBlob(code){
+    return new Promise(function(resolve,reject){
+      var blob=new Blob([code],{type:'application/javascript'}); // MIME forcé (≠ text/plain)
+      var blobUrl=URL.createObjectURL(blob);
+      var s=document.createElement('script');
+      s.src=blobUrl; s.async=false;
+      s.onload=function(){ URL.revokeObjectURL(blobUrl); resolve(); };
+      s.onerror=function(){ URL.revokeObjectURL(blobUrl); reject(new Error('Blob onerror')); };
+      document.head.appendChild(s);
+    });
+  }
+
+  // STRATÉGIE 2 : indirect eval en scope global
+  function _injectViaEval(code){
+    return new Promise(function(resolve,reject){
+      try{ (0,eval)(code); resolve(); }
+      catch(e){ reject(e); }
+    });
+  }
+
+  // STRATÉGIE 3 : script inline textContent (exécution synchrone)
+  function _injectViaInline(code){
+    return new Promise(function(resolve,reject){
+      try{
+        var s=document.createElement('script');
+        s.textContent=code;
+        document.head.appendChild(s);
+        resolve();
+      }catch(e){ reject(e); }
+    });
+  }
+
+  // Charge UN script, en essayant les stratégies dans l'ordre.
+  // checkVar : nom de la variable globale attendue (ex 'THREE') pour valider, ou null
+  function _loadOne(url, checkVar){
+    return _getText(url).then(function(code){
+      _d('info','  taille : '+code.length+' octets');
+
+      function tryStrategy(name, fn){
+        return fn(code).then(function(){
+          // Validation : la variable globale attendue est-elle définie ?
+          if(checkVar){
+            var ok=(typeof window[checkVar]!=='undefined');
+            if(ok){ _d('ok','  ['+name+'] → '+checkVar+' défini ✓'); return true; }
+            _d('warn','  ['+name+'] exécuté mais '+checkVar+' absent ✗');
+            return false;
+          }
+          _d('ok','  ['+name+'] exécuté ✓');
+          return true;
+        }).catch(function(e){
+          _d('warn','  ['+name+'] échec : '+e.message);
+          return false;
+        });
+      }
+
+      return tryStrategy('Blob', _injectViaBlob)
+        .then(function(ok){ return ok || tryStrategy('eval', _injectViaEval); })
+        .then(function(ok){ return ok || tryStrategy('inline', _injectViaInline); })
+        .then(function(ok){
+          if(!ok) throw new Error('Toutes les stratégies ont échoué pour '+url+(checkVar?' ('+checkVar+' jamais défini)':''));
+        });
+    });
+  }
+
+  function _loadQ3DScripts(cb){
+    if(_Q3D_ready){ cb(); return; }
+    if(cb) _Q3D_callbacks.push(cb);
+    if(_Q3D_loading) return;
+    _Q3D_loading=true;
+
+    _d('info','═══ Chargement des scripts 3D ═══');
+
+    _loadOne(BASE_Q3D+'threejs/three.min.js','THREE')
+      .then(function(){ return _loadOne(BASE_Q3D+'threejs/OrbitControls.js',null); })
+      .then(function(){ return _loadOne(BASE_Q3D+'threejs/ViewHelper.js',null); })
+      .then(function(){ return _loadOne(BASE_Q3D+'Qgis2threejs.js','Q3D'); })
+      .then(function(){
+        _d('ok','═══ Tous les scripts chargés ✓ ═══');
+        _Q3D_ready=true; _Q3D_loading=false;
+        _Q3D_callbacks.forEach(function(fn){ fn(); });
+        _Q3D_callbacks=[];
       })
-      .then(function() {
-        return _injectScriptLocally("./threejs/ViewHelper.js");
-      })
-      .then(function() {
-        return _injectScriptLocally("./Qgis2threejs.js");
-      })
-      .then(function() {
-        // Tous les scripts sont chargés avec succès et dans le bon ordre !
-        callback();
-      })
-      .catch(function(err) {
-        console.error("Erreur lors du chargement des scripts 3D :", err);
-        var container = document.getElementById('fonte-view');
-        if (container) {
-          container.innerHTML = '<div style="color:red; padding:20px;">Erreur de chargement des composants 3D.</div>';
-        }
+      .catch(function(e){
+        _Q3D_loading=false;
+        _d('err','ÉCHEC : '+e.message);
+        var c=document.getElementById('fonte-view');
+        if(c) c.innerHTML='<div style="color:#f55;padding:20px;font-family:monospace;font-size:.8rem;line-height:1.5">Erreur chargement 3D :<br>'+e.message+'<br><br>Ouvre le panneau DEBUG pour le détail.</div>';
       });
   }
   </script>
@@ -1806,6 +1874,9 @@ window.openFontePanel=function(){
     _fonteInited=true;
     container.innerHTML=''; // Vider le message d'attente
 
+    dlog('info','Init Q3D…');
+    if(typeof Q3D==='undefined'){ dlog('err','Q3D toujours indéfini après chargement'); return; }
+
     // Qgis2threejs cherche getElementById('view') en interne
     container.id='view';
 
@@ -1818,10 +1889,14 @@ window.openFontePanel=function(){
 
     var app=Q3D.application;
     app.init(container);
-    app.loadSceneFile(
-      'https://raw.githubusercontent.com/Jeomatique/antarctique/main/data/Fonte/scene.js',
-      function(scene){ app.start(); },
-      function(scene){}
+
+    // scene.js est aussi servi en text/plain par GitHub → on le récupère via fetch
+    // puis on l'exécute, car loadSceneFile interne pourrait échouer sur le MIME.
+    var sceneUrl=BASE_Q3D+'data/Fonte/scene.js';
+    dlog('info','Chargement scene.js…');
+    app.loadSceneFile(sceneUrl,
+      function(scene){ dlog('ok','scene.js chargé — démarrage'); app.start(); },
+      function(scene){ dlog('ok','Scène complète'); }
     );
 
     container.id='fonte-view';
