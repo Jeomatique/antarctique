@@ -378,30 +378,28 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0a0f1a;font-family:
 #fonte-panel #infobtn::before{content:url("data:image/svg+xml;base64,PHN2ZyB2aWV3Qm94PSIwIDAgMTAwIDEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBjbGFzcz0ibGF5ZXIiIHN0cm9rZT0iIzAwMCI+PGNpcmNsZSBjeD0iNTAuMiIgY3k9IjUwIiByPSIzNiIgc3Ryb2tlLXdpZHRoPSIxMCIgZmlsbD0ibm9uZSIvPjxjaXJjbGUgY3g9IjUwIiBjeT0iMzAiIHI9IjUiLz48cGF0aCBkPSJNNDIgNDRoOHYyNW0tOCAyaDE2IiBzdHJva2Utd2lkdGg9IjgiIGZpbGw9Im5vbmUiLz48L2c+PC9zdmc+");}
 #fonte-panel .zoombtn::before{content:url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48ZyBjbGFzcz0ibGF5ZXIiIHN0cm9rZT0iIzAwMCIgZmlsbD0ibm9uZSI+PGNpcmNsZSBjeD0iNDIiIGN5PSI0MiIgcj0iMzMiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIHN0cm9rZS13aWR0aD0iOCIvPjxwYXRoIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLXdpZHRoPSIxNCIgZD0ibTY4IDY4IDE5IDE5Ii8+PHBhdGggc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2Utd2lkdGg9IjYiIGQ9Ik0yNyA0MWgzME00MiAyN3YzMCIvPjwvZz48L3N2Zz4=");}
   </style>
-  <!-- ── Qgis2threejs : chargement séquentiel garanti via fetch + script inline ── -->
+  <!-- ── Qgis2threejs : fetch → Blob URL → script async=false (ordre garanti) ── -->
   <script>
   var _Q3D_ready=false;
   var _Q3D_loading=false;
   var _Q3D_callbacks=[];
 
-  function _injectScript(code){
-    return new Promise(function(resolve){
-      var s=document.createElement('script');
-      s.textContent=code;
-      s.onload=resolve; // ne se déclenche pas sur inline
-      document.head.appendChild(s);
-      resolve(); // inline scripts sont synchrones → résout immédiatement après injection
-    });
-  }
-
-  function _fetchAndInject(url){
+  function _fetchAsBlob(url){
     return fetch(url)
       .then(function(r){
-        if(!r.ok) throw new Error('HTTP '+r.status+' pour '+url);
-        return r.text();
+        if(!r.ok) throw new Error('HTTP '+r.status+' — '+url);
+        return r.blob();
       })
-      .then(function(code){
-        return _injectScript(code);
+      .then(function(blob){
+        return new Promise(function(resolve, reject){
+          var blobUrl=URL.createObjectURL(blob);
+          var s=document.createElement('script');
+          s.src=blobUrl;
+          s.async=false;
+          s.onload=function(){ URL.revokeObjectURL(blobUrl); resolve(); };
+          s.onerror=function(e){ URL.revokeObjectURL(blobUrl); reject(new Error('Echec exec: '+url)); };
+          document.head.appendChild(s);
+        });
       });
   }
 
@@ -413,11 +411,10 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0a0f1a;font-family:
 
     var BASE='https://raw.githubusercontent.com/Jeomatique/antarctique/main/';
 
-    // Chaîne strictement séquentielle : chaque then attend le précédent
-    _fetchAndInject(BASE+'threejs/three.min.js')
-      .then(function(){ return _fetchAndInject(BASE+'threejs/OrbitControls.js'); })
-      .then(function(){ return _fetchAndInject(BASE+'threejs/ViewHelper.js'); })
-      .then(function(){ return _fetchAndInject(BASE+'Qgis2threejs.js'); })
+    _fetchAsBlob(BASE+'threejs/three.min.js')
+      .then(function(){ return _fetchAsBlob(BASE+'threejs/OrbitControls.js'); })
+      .then(function(){ return _fetchAsBlob(BASE+'threejs/ViewHelper.js'); })
+      .then(function(){ return _fetchAsBlob(BASE+'Qgis2threejs.js'); })
       .then(function(){
         _Q3D_ready=true;
         _Q3D_loading=false;
@@ -426,6 +423,8 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0a0f1a;font-family:
       })
       .catch(function(e){
         console.error('Erreur chargement Q3D :', e);
+        var c=document.getElementById('fonte-view');
+        if(c) c.innerHTML='<div style="color:#f55;padding:20px;font-family:monospace">Erreur chargement 3D : '+e.message+'</div>';
       });
   }
   </script>
