@@ -464,7 +464,13 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0a0f1a;font-family:
   }
 
   function _loadQ3DScripts(callback) {
-    // Liste des scripts avec de VRAIS chemins relatifs locaux
+    // 1. ASSAINISSEMENT CONFLIT ARCGIS/ESRI : Masquer temporairement 'define'
+    var _savedDefine = window.define;
+    if (window.define && window.define.amd) {
+      window.define = undefined; // On le cache pour forcer Three.js à se charger globalement
+    }
+  
+    // Liste des scripts locaux relatifs
     var scripts = [
       "./threejs/three.min.js",
       "./threejs/OrbitControls.js",
@@ -477,6 +483,12 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0a0f1a;font-family:
     function loadNext() {
       if (index >= scripts.length) {
         dlog('success', '═══ Tous les scripts 3D sont chargés ! ═══');
+        
+        // 2. RESTAURATION : On redonne le contrôle à ArcGIS une fois la 3D initialisée
+        if (_savedDefine) {
+          window.define = _savedDefine;
+        }
+        
         callback();
         return;
       }
@@ -486,7 +498,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0a0f1a;font-family:
   
       var script = document.createElement('script');
       script.src = url;
-      script.async = false; // Force le navigateur à les exécuter dans l'ordre exact
+      script.async = false; // Maintient l'ordre d'exécution strict
   
       script.onload = function() {
         dlog('success', '↳ Chargé avec succès');
@@ -496,6 +508,8 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0a0f1a;font-family:
   
       script.onerror = function() {
         dlog('err', '↳ ÉCHEC de l\'insertion du script : ' + url);
+        // Sécurité : on restaure quand même ArcGIS en cas de plantage
+        if (_savedDefine) window.define = _savedDefine;
       };
   
       document.head.appendChild(script);
