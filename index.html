@@ -277,6 +277,66 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0a0f1a;font-family:
       color:#00c8b4;display:none;flex-direction:column;pointer-events:all;
       box-shadow:0 4px 24px rgba(0,0,0,.8);
     }
+
+    /* ── PANNEAU CAMÉRA HUD ─────────────────────── */
+    #cam-hud{
+      position:fixed;top:102px;right:8px;z-index:2500;
+      background:rgba(2,8,16,0.93);border:1px solid rgba(200,168,75,0.35);
+      border-radius:8px;padding:10px 14px 8px 14px;
+      font-family:'Courier New',monospace;font-size:.62rem;color:rgba(200,168,75,0.9);
+      min-width:210px;pointer-events:all;box-shadow:0 4px 20px rgba(0,0,0,.7);
+      backdrop-filter:blur(8px);display:none;
+    }
+    #cam-hud.open{display:block;}
+    #cam-hud-title{
+      font-size:.58rem;letter-spacing:.15em;text-transform:uppercase;
+      color:rgba(200,168,75,0.5);margin-bottom:8px;
+      display:flex;justify-content:space-between;align-items:center;
+    }
+    #cam-hud-close{background:none;border:none;color:rgba(200,168,75,0.4);cursor:pointer;font-size:.9rem;padding:0;line-height:1;}
+    #cam-hud-close:hover{color:var(--gold);}
+    .cam-row{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px;gap:8px;}
+    .cam-lbl{color:rgba(255,255,255,0.35);font-size:.58rem;letter-spacing:.08em;min-width:46px;}
+    .cam-val{color:rgba(200,168,75,1);font-size:.72rem;font-weight:bold;text-align:right;flex:1;}
+    .cam-unit{color:rgba(255,255,255,0.25);font-size:.52rem;margin-left:3px;}
+    #cam-sep{height:1px;background:rgba(255,255,255,.07);margin:6px 0;}
+    #cam-copy-btn{
+      width:100%;padding:5px 0;margin-top:6px;
+      background:rgba(200,168,75,0.12);border:1px solid rgba(200,168,75,0.3);
+      border-radius:4px;color:var(--gold);font-family:'Courier New',monospace;
+      font-size:.58rem;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;
+      transition:background .18s,border-color .18s;
+    }
+    #cam-copy-btn:hover{background:rgba(200,168,75,0.22);border-color:rgba(200,168,75,0.6);}
+    #cam-copy-btn.copied{background:rgba(0,200,100,0.15);border-color:rgba(0,200,100,0.4);color:#00c864;}
+    #cam-hud-toggle{
+      position:fixed;top:64px;right:6px;z-index:2501;
+      background:rgba(2,8,16,0.88);border:1px solid rgba(200,168,75,0.25);
+      border-radius:5px;padding:5px 10px;color:var(--gold);
+      font-family:'Courier New',monospace;font-size:.58rem;cursor:pointer;
+      letter-spacing:1px;transition:border-color .2s;display:none;
+    }
+    #cam-hud-toggle.visible{display:block;}
+    #cam-hud-toggle:hover{border-color:var(--gold);}
+
+    /* ── BOUTON PLEIN ÉCRAN ─────────────────────── */
+    #fs-btn{
+      position:absolute;bottom:120px;right:24px;z-index:200;
+      width:48px;height:48px;border-radius:12px;
+      background:rgba(4,12,22,.88);border:1px solid rgba(255,255,255,.12);
+      cursor:pointer;display:none;align-items:center;justify-content:center;
+      backdrop-filter:blur(10px);transition:border-color .2s,transform .15s,opacity .8s;
+      box-shadow:0 4px 20px rgba(0,0,0,.5);opacity:0;
+    }
+    #fs-btn.visible{display:flex;opacity:1;}
+    #fs-btn:hover{border-color:rgba(200,168,75,.5);transform:translateY(-1px);}
+    #fs-btn svg{width:22px;height:22px;opacity:.7;transition:opacity .15s;}
+    #fs-btn:hover svg{opacity:1;}
+    #cam-etape-badge{
+      margin-top:6px;padding:4px 0;
+      font-size:.58rem;letter-spacing:.06em;color:rgba(0,200,180,0.7);
+      border-top:1px solid rgba(255,255,255,.07);text-align:center;
+    }
     #debug-panel.open{display:flex;}
     #dbg-hdr{display:flex;align-items:center;gap:6px;padding:5px 8px;
       border-bottom:1px solid rgba(0,200,180,0.2);background:rgba(0,200,180,0.06);flex-shrink:0;}
@@ -598,6 +658,19 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0a0f1a;font-family:
 
   <div id="toast">Message</div>
 
+  <!-- Plein écran -->
+  <button id="fs-btn" onclick="toggleFullscreen()" title="Plein écran">
+    <!-- Icône "expand" — remplacée dynamiquement selon l'état -->
+    <svg id="fs-icon-expand" viewBox="0 0 24 24" fill="none" stroke="var(--teal)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/>
+      <line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/>
+    </svg>
+    <svg id="fs-icon-shrink" viewBox="0 0 24 24" fill="none" stroke="var(--teal)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="display:none">
+      <polyline points="4 14 10 14 10 20"/><polyline points="20 10 14 10 14 4"/>
+      <line x1="10" y1="14" x2="3" y2="21"/><line x1="21" y1="3" x2="14" y2="10"/>
+    </svg>
+  </button>
+
   <!-- Basemap -->
   <button id="basemap-btn" onclick="toggleBasemapPanel()" title="Fond de carte">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="color:var(--teal)"><path d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/></svg>
@@ -663,6 +736,45 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0a0f1a;font-family:
   <!-- Bouton debug -->
   <button id="debug-toggle" onclick="toggleDebug()">⬛ DEBUG</button>
   <div id="debug-panel">
+
+  <!-- Bouton toggle HUD caméra -->
+  <button id="cam-hud-toggle" onclick="toggleCamHud()">📷 CAM</button>
+
+  <!-- Panneau HUD caméra -->
+  <div id="cam-hud">
+    <div id="cam-hud-title">
+      <span>📷 Caméra ArcGIS</span>
+      <button id="cam-hud-close" onclick="toggleCamHud()">✕</button>
+    </div>
+    <div class="cam-row">
+      <span class="cam-lbl">Longitude</span>
+      <span class="cam-val" id="chud-lon">—</span>
+      <span class="cam-unit">°</span>
+    </div>
+    <div class="cam-row">
+      <span class="cam-lbl">Latitude</span>
+      <span class="cam-val" id="chud-lat">—</span>
+      <span class="cam-unit">°</span>
+    </div>
+    <div class="cam-row">
+      <span class="cam-lbl">Altitude Z</span>
+      <span class="cam-val" id="chud-z">—</span>
+      <span class="cam-unit">m</span>
+    </div>
+    <div id="cam-sep"></div>
+    <div class="cam-row">
+      <span class="cam-lbl">Tilt</span>
+      <span class="cam-val" id="chud-tilt">—</span>
+      <span class="cam-unit">°</span>
+    </div>
+    <div class="cam-row">
+      <span class="cam-lbl">Heading</span>
+      <span class="cam-val" id="chud-head">—</span>
+      <span class="cam-unit">°</span>
+    </div>
+    <div id="cam-etape-badge" id="chud-etape">Étape active : —</div>
+    <button id="cam-copy-btn" onclick="copyCamPos()">⧉ Copier les coordonnées</button>
+  </div>
     <div id="dbg-hdr">
       <b>⬛ DEBUG</b>
       <button class="dbg-btn" onclick="copyDebugLog()">COPY</button>
@@ -783,6 +895,31 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0a0f1a;font-family:
 // =====================================================
 var GH = "https://raw.githubusercontent.com/Jeomatique/antarctique/main/";
 
+// =====================================================
+//  CONFIG CAMÉRA PAR ÉTAPE
+//  Format : CAMERA_ETAPE = { <numéro_étape>: [longitude, latitude, altitude_z, tilt, heading] }
+//  • longitude : degrés décimaux  (ex: -65.2)
+//  • latitude  : degrés décimaux  (ex: -67.5)
+//  • altitude_z: mètres           (ex: 80000)
+//  • tilt      : 0° = vue du dessus, 90° = vue horizontale (ex: 55)
+//  • heading   : cap Nord = 0°, Est = 90°, Sud = 180°, Ouest = 270°
+//
+//  Si une étape N'EST PAS listée ici → comportement par défaut :
+//  téléportation sur le premier point de l'étape (z=80000, tilt=55)
+//
+//  Exemple :
+//  var CAMERA_ETAPE = {
+//    1: [-65.2, -67.5, 120000, 45, 0],
+//    2: [-45.0, -70.0, 200000, 30, 90],
+//  };
+// =====================================================
+var CAMERA_ETAPE = {
+  // Décommentez et remplissez les étapes souhaitées :
+  // 1: [longitude, latitude, z, tilt, heading],
+  // 2: [longitude, latitude, z, tilt, heading],
+};
+
+
 // ── EPSG:3031 → WGS84 (Polar Stereographic South) ──
 function proj3031toWGS84(x,y){
   var a=6378137.0,e=0.0818191908426215,e2=e*e;
@@ -880,6 +1017,8 @@ window.startTransition=function(){
       document.getElementById('basemap-btn').classList.add('visible');
       document.getElementById('footer-bar').classList.add('visible');
       document.getElementById('character-wrap').classList.add('visible');
+      document.getElementById('cam-hud-toggle').classList.add('visible');
+      document.getElementById('fs-btn').classList.add('visible');
     },800);
   },8000);
 };
@@ -1612,10 +1751,24 @@ function initApp(){
       isPlaying=false;
       document.querySelectorAll('.stage-rect').forEach(function(r){if(parseInt(r.dataset.idx)>idx){r.classList.remove('done');r.querySelector('.stage-progress').style.width='0%';}});
       distCovered=0;prevDist=0;trailPts=[];
-      // Téléportation caméra sur le premier point de l'étape (clic utilisateur uniquement)
+      // Téléportation caméra : CAMERA_ETAPE en priorité, sinon premier point de l'étape
       if(stages[idx]){
-        var s=stages[idx].coords[0];
-        view.goTo({position:{longitude:s[0],latitude:s[1],z:80000},tilt:55},{duration:1200});
+        var etapeNum=stages[idx].etape;
+        var camFixed=CAMERA_ETAPE[etapeNum];
+        if(camFixed && camFixed.length>=5){
+          // Position fixée manuellement dans CAMERA_ETAPE
+          view.goTo({
+            position:{longitude:camFixed[0], latitude:camFixed[1], z:camFixed[2]},
+            tilt:camFixed[3],
+            heading:camFixed[4]
+          },{duration:1200});
+          dlog('ok','Caméra étape '+etapeNum+' → CAMERA_ETAPE fixe ['+camFixed+']');
+        } else {
+          // Comportement par défaut : premier point de l'étape
+          var s=stages[idx].coords[0];
+          view.goTo({position:{longitude:s[0],latitude:s[1],z:80000},tilt:55},{duration:1200});
+          dlog('info','Caméra étape '+etapeNum+' → défaut (premier point)');
+        }
       }
       startStage(idx);
     };
@@ -1663,6 +1816,34 @@ function initApp(){
     }
 
     window._arcgisView = view;
+
+    // ── HUD Caméra : mise à jour en temps réel ──────
+    // Surveille chaque changement de caméra pour mettre à jour l'affichage
+    view.watch("camera", function(cam){
+      if(!document.getElementById('cam-hud').classList.contains('open')) return;
+      var p=cam.position;
+      document.getElementById('chud-lon').textContent  = p.longitude.toFixed(6);
+      document.getElementById('chud-lat').textContent  = p.latitude.toFixed(6);
+      document.getElementById('chud-z').textContent    = Math.round(p.z).toLocaleString('fr-FR');
+      document.getElementById('chud-tilt').textContent = cam.tilt.toFixed(2);
+      document.getElementById('chud-head').textContent = cam.heading.toFixed(2);
+      var etapeEl=document.getElementById('cam-etape-badge');
+      if(etapeEl) etapeEl.textContent='Étape active : '+(currentStageEtape||'—');
+    });
+
+    // Forcer une mise à jour initiale quand le HUD s'ouvre
+    window._hudRefreshCam=function(){
+      if(!window._arcgisView) return;
+      var cam=window._arcgisView.camera;
+      var p=cam.position;
+      document.getElementById('chud-lon').textContent  = p.longitude.toFixed(6);
+      document.getElementById('chud-lat').textContent  = p.latitude.toFixed(6);
+      document.getElementById('chud-z').textContent    = Math.round(p.z).toLocaleString('fr-FR');
+      document.getElementById('chud-tilt').textContent = cam.tilt.toFixed(2);
+      document.getElementById('chud-head').textContent = cam.heading.toFixed(2);
+      var etapeEl=document.getElementById('cam-etape-badge');
+      if(etapeEl) etapeEl.textContent='Étape active : '+(typeof currentStageEtape!=='undefined'?currentStageEtape:'—');
+    };
 
     // ── Canvas overlay pour images thématiques ──────
     window._themeMeshLayer = null;
@@ -1905,6 +2086,98 @@ window.closeCharacter=function(){
     document.getElementById('legend-box').classList.add('visible');
   },500);
 };
+
+// ── HUD Caméra : affichage/masquage ────────────────
+window.toggleCamHud=function(){
+  var hud=document.getElementById('cam-hud');
+  var btn=document.getElementById('cam-hud-toggle');
+  var isOpen=hud.classList.toggle('open');
+  if(btn) btn.style.display=isOpen?'none':'block';
+  if(isOpen && window._hudRefreshCam) window._hudRefreshCam();
+};
+
+// Copie les coordonnées dans le presse-papier au format CAMERA_ETAPE
+window.copyCamPos=function(){
+  var btn=document.getElementById('cam-copy-btn');
+  if(!window._arcgisView){ alert('Vue ArcGIS non disponible'); return; }
+  var cam=window._arcgisView.camera;
+  var p=cam.position;
+  var etape=(typeof currentStageEtape!=='undefined' && currentStageEtape) ? currentStageEtape : 'X';
+  var lon=p.longitude.toFixed(6);
+  var lat=p.latitude.toFixed(6);
+  var z=Math.round(p.z);
+  var tilt=cam.tilt.toFixed(2);
+  var head=cam.heading.toFixed(2);
+  var txt=etape+': ['+lon+', '+lat+', '+z+', '+tilt+', '+head+']';
+  navigator.clipboard.writeText(txt).then(function(){
+    var orig=btn.textContent;
+    btn.textContent='✓ Copié !';
+    btn.classList.add('copied');
+    setTimeout(function(){ btn.textContent=orig; btn.classList.remove('copied'); }, 1800);
+  }).catch(function(){ alert(txt); });
+};
+
+// ── PLEIN ÉCRAN universel ───────────────────────────
+// Couvre : standard W3C, WebKit (Safari/iOS ancien), Moz (Firefox), MS (IE11/Edge ancien)
+window.toggleFullscreen=function(){
+  var el=document.documentElement; // fullscreen sur toute la page
+
+  // Détecte si on est déjà en plein écran (tous préfixes)
+  var isFs = !!(
+    document.fullscreenElement ||
+    document.webkitFullscreenElement ||
+    document.mozFullScreenElement ||
+    document.msFullscreenElement
+  );
+
+  if(!isFs){
+    // Entrer en plein écran
+    if     (el.requestFullscreen)       el.requestFullscreen();
+    else if(el.webkitRequestFullscreen) el.webkitRequestFullscreen(); // Safari / Chrome ancien / iOS WKWebView
+    else if(el.mozRequestFullScreen)    el.mozRequestFullScreen();    // Firefox ancien
+    else if(el.msRequestFullscreen)     el.msRequestFullscreen();     // IE11 / Edge ancien
+    // iOS Safari ne supporte pas l'API Fullscreen → on simule via CSS viewport
+    else { _iosFsOn(); }
+  } else {
+    // Quitter le plein écran
+    if     (document.exitFullscreen)       document.exitFullscreen();
+    else if(document.webkitExitFullscreen) document.webkitExitFullscreen();
+    else if(document.mozCancelFullScreen)  document.mozCancelFullScreen();
+    else if(document.msExitFullscreen)     document.msExitFullscreen();
+    else { _iosFsOff(); }
+  }
+};
+
+// Fallback iOS Safari : simule le plein écran en fixant body à 100vw/100vh
+// (l'API Fullscreen est bloquée en dehors des PWA sur iOS)
+function _iosFsOn(){
+  document.body.style.cssText='position:fixed;top:0;left:0;width:100vw;height:100vh;overflow:hidden;z-index:9999;';
+  _updateFsIcon(true);
+}
+function _iosFsOff(){
+  document.body.style.cssText='';
+  _updateFsIcon(false);
+}
+
+// Met à jour l'icône expand ↔ shrink
+function _updateFsIcon(isFull){
+  var expand=document.getElementById('fs-icon-expand');
+  var shrink=document.getElementById('fs-icon-shrink');
+  if(!expand||!shrink) return;
+  expand.style.display=isFull?'none':'block';
+  shrink.style.display=isFull?'block':'none';
+}
+
+// Écouter les changements d'état plein écran (tous préfixes)
+['fullscreenchange','webkitfullscreenchange','mozfullscreenchange','MSFullscreenChange'].forEach(function(evt){
+  document.addEventListener(evt, function(){
+    var isFs=!!(
+      document.fullscreenElement||document.webkitFullscreenElement||
+      document.mozFullScreenElement||document.msFullscreenElement
+    );
+    _updateFsIcon(isFs);
+  });
+});
 
 // ── Sélection unifiée (portraits + thèmes = UN seul actif parmi les 4) ──
 // Chaque portrait et chaque cercle thème font partie du même groupe de sélection
