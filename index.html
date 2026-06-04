@@ -1413,7 +1413,7 @@ function initApp(){
       });
     }
     // Appelé dans animLoop avec dt en secondes — interpole chaque label vers sa cible
-    var LABEL_FADE_DURATION=100.0; // 1 seconde
+    var LABEL_FADE_DURATION=5000.0; // 1 seconde
     function animLabelFade(dt){
       var speed=dt/LABEL_FADE_DURATION; // fraction à avancer par frame
       textLabels.forEach(function(lbl){
