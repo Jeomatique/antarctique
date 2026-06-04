@@ -1332,7 +1332,7 @@ function initApp(){
         var fadeDur=2.0; // 2s fixe
         var lbl={text:text,taille_m:taille,etape:etape,classe:classe,midLon:mp.lon,midLat:mp.lat,fadeStartKm:distMid,fadeEndKm:distMid+fadeDur*speed,opacity:0};
         textLabels.push(lbl);
-        labelStates[text]={opacity:0,fadeStartKm:distMid,fadeEndKm:distMid+fadeDur*speed,etape:etape};
+        labelStates[text]={opacity:0,activated:false,activationTime:null,fadeStartKm:distMid,fadeEndKm:distMid+fadeDur*speed,etape:etape};
       });
     }
 
@@ -1401,38 +1401,86 @@ function initApp(){
     }
     function updateTextLabel(lbl,opacity){var o=textGfxMap[lbl.text];if(o)textLayer.remove(o);var g=buildTextGfx(lbl,opacity);textGfxMap[lbl.text]=g;textLayer.add(g);}
     function initTextGfx(){textLabels.forEach(function(lbl){var g=buildTextGfx(lbl,0);textGfxMap[lbl.text]=g;textLayer.add(g);});}
-    function updateLabels(etape,dk){
+    // ── Fondu des textes — deux méthodes selon parité de l'étape ───────────
+    // Étape PAIRE  → Méthode A : déclenchement instantané dès que le bateau
+    //   franchit fadeStartKm, puis performance.now() pilote l'opacité sur 1s.
+    //   (Analogue CSS transition : on "tire" l'opacité vers 1 en fonction du
+    //    temps réel écoulé depuis l'activation, indépendamment de la vitesse.)
+    // Étape IMPAIRE → Méthode B : même base temporelle mais l'opacité est
+    //   recalculée à chaque frame via performance.now() depuis activationTime.
+    // Les deux utilisent performance.now() → aucune dépendance à la distance.
+    var LABEL_FADE_MS = 1000.0; // durée du fondu en millisecondes
+
+    function updateLabels(etape, dk){
       textLabels.forEach(function(lbl){
-        var st=labelStates[lbl.text];if(!st||st.etape!==etape)return;
-        // Calculer l'opacité cible selon la progression du bateau
-        var target=dk<st.fadeStartKm?0:dk>=st.fadeEndKm?1:(dk-st.fadeStartKm)/(st.fadeEndKm-st.fadeStartKm);
-        target=Math.min(1,Math.max(0,target));
-        if(st.targetOpacity===undefined) st.targetOpacity=0;
-        st.targetOpacity=target;
-        // L'interpolation vers la cible est faite dans animLabelFade()
-      });
-    }
-    // Appelé dans animLoop avec dt en secondes — interpole chaque label vers sa cible
-    var LABEL_FADE_DURATION=5000.0; // 1 seconde
-    function animLabelFade(dt){
-      var speed=dt/LABEL_FADE_DURATION; // fraction à avancer par frame
-      textLabels.forEach(function(lbl){
-        var st=labelStates[lbl.text];if(!st)return;
-        var target=st.targetOpacity!==undefined?st.targetOpacity:st.opacity;
-        if(Math.abs(target-st.opacity)<0.008){
-          // Clamp final pour éviter une accumulation d'updates inutiles
-          if(st.opacity!==target){st.opacity=target;updateTextLabel(lbl,target);}
-          return;
+        var st = labelStates[lbl.text];
+        if(!st || st.etape !== etape) return;
+
+        var shouldShow = (dk >= st.fadeStartKm);
+
+        if(shouldShow && !st.activated){
+          // ── Déclenchement : le bateau vient de passer le seuil ──
+          st.activated     = true;
+          st.activationTime = performance.now(); // timestamp réel (ms)
+          st.opacity        = 0;
+        } else if(!shouldShow && st.activated){
+          // Retour en arrière (reset) : éteindre immédiatement
+          st.activated      = false;
+          st.activationTime = null;
+          st.opacity        = 0;
+          updateTextLabel(lbl, 0);
         }
-        // Lerp linéaire vers la cible
-        var newOp=st.opacity+(target-st.opacity)*Math.min(1,speed*8);
-        // Vitesse : facteur 8 → 1s pour passer de 0→1 environ
-        newOp=Math.min(1,Math.max(0,newOp));
-        st.opacity=newOp;
-        updateTextLabel(lbl,newOp);
       });
     }
-    function resetLabels(etape){textLabels.forEach(function(lbl){var st=labelStates[lbl.text];if(st&&st.etape===etape&&st.opacity!==0){st.opacity=0;st.targetOpacity=0;updateTextLabel(lbl,0);}});}
+
+    // Appelé chaque frame dans animLoop — fait avancer l'opacité dans le temps
+    function animLabelFade(){
+      var now = performance.now();
+      textLabels.forEach(function(lbl){
+        var st = labelStates[lbl.text];
+        if(!st || !st.activated || st.activationTime === null) return;
+
+        var elapsed  = now - st.activationTime;          // ms depuis activation
+        var progress = Math.min(1, elapsed / LABEL_FADE_MS); // 0 → 1 sur 1000ms
+        var newOp;
+
+        if(st.etape % 2 === 0){
+          // ── Méthode A (étape PAIRE) ──────────────────────────────────────
+          // Courbe ease-in-out : progress³ × (3 − 2×progress)  (smoothstep)
+          // Reproduit exactement le comportement de la transition CSS ease-in-out
+          newOp = progress * progress * (3 - 2 * progress);
+        } else {
+          // ── Méthode B (étape IMPAIRE) ────────────────────────────────────
+          // Courbe ease-in : progress² — démarre lentement, accélère
+          // Donne une apparition plus progressive, perçue comme "naturelle"
+          newOp = progress * progress;
+        }
+
+        newOp = Math.min(1, Math.max(0, newOp));
+
+        // Ne redessiner que si l'opacité a changé de façon perceptible
+        if(Math.abs(newOp - st.opacity) > 0.005){
+          st.opacity = newOp;
+          updateTextLabel(lbl, newOp);
+        } else if(progress >= 1 && st.opacity < 1){
+          // Clamp final : s'assurer qu'on atteint bien 1
+          st.opacity = 1;
+          updateTextLabel(lbl, 1);
+        }
+      });
+    }
+
+    function resetLabels(etape){
+      textLabels.forEach(function(lbl){
+        var st = labelStates[lbl.text];
+        if(st && st.etape === etape && st.opacity !== 0){
+          st.opacity        = 0;
+          st.activated      = false;
+          st.activationTime = null;
+          updateTextLabel(lbl, 0);
+        }
+      });
+    }
 
     // ── Icônes info : affichage 3D ───────────────
     // Cercles pulsants + tige verticale + cercle bleu avec (i)
@@ -1789,7 +1837,7 @@ function initApp(){
       }
       updateTrail();
       updateLabels(st.etape,distCovered);
-      animLabelFade(dt);
+      animLabelFade();
       updateIcones(st.etape,pos.lon,pos.lat);
       updateCitations(st.etape,pos.lon,pos.lat);
       var pct=distCovered/st.totalDist;
