@@ -11,7 +11,7 @@ Vous pouvez créer des liens externes vers n'importe quelle ressource : [Google 
 
 ### 🖼️ Inclusion d'Image
 Voici une image intégrée : 
-![Description de l'image]([https://upload.wikimedia.org/wikipedia/commons/thumb/f/ff/Amboise_-_oppidum_coupe_g%C3%A9n%C3%A9rale_du_rempart.jpg/330px-Amboise_-_oppidum_coupe_g%C3%A9n%C3%A9rale_du_rempart.jpg])
+![Description de l'image](https://upload.wikimedia.org/wikipedia/commons/thumb/f/ff/Amboise_-_oppidum_coupe_g%C3%A9n%C3%A9rale_du_rempart.jpg/330px-Amboise_-_oppidum_coupe_g%C3%A9n%C3%A9rale_du_rempart.jpg)
 
 ---
 
