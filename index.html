@@ -7,6 +7,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet"/>
+  <!-- Marked.js : parser Markdown léger (pour le panneau Crédits) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/9.1.6/marked.min.js" defer></script>
   <style>
 /* ── BASE ─────────────────────────────────────── */
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
@@ -189,7 +191,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0a0f1a;font-family:
 #bubble{position:relative;bottom:10px;background:rgba(5,5,5,.92);border:1px solid rgba(255,255,255,.15);border-radius:12px 12px 12px 0;padding:16px 20px 14px 18px;max-width:300px;min-width:180px;box-shadow:0 8px 32px rgba(0,0,0,.6);margin-left:14px;}
 #bubble::before{content:'';position:absolute;left:-11px;bottom:18px;border:6px solid transparent;border-right-color:rgba(5,5,5,.92);}
 #bubble-text{font-family:'EB Garamond',serif;font-size:.9rem;line-height:1.6;color:rgba(255,255,255,.85);}
-#bubble-close{position:absolute;top:10px;right:10px;background:none;border:none;color:rgba(255,255,255,.4);font-size:1.5rem;cursor:pointer;line-height:1;transition:color .2s;}
+#bubble-close{position:absolute;top:7px;right:9px;background:none;border:none;color:rgba(255,255,255,.4);font-size:1rem;cursor:pointer;line-height:1;transition:color .2s;}
 #bubble-close:hover{color:#fff;}
 
 /* ── LÉGENDE ────────────────────────────────── */
@@ -319,6 +321,84 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0a0f1a;font-family:
     #cam-hud-toggle.visible{display:block;}
     #cam-hud-toggle:hover{border-color:var(--gold);}
 
+    /* ── PANNEAU CRÉDITS ────────────────────────── */
+    #credits-overlay{
+      position:fixed;inset:0;z-index:3500;
+      background:rgba(0,0,0,.75);backdrop-filter:blur(6px);
+      display:none;align-items:center;justify-content:center;
+      padding:20px;
+    }
+    #credits-overlay.open{display:flex;}
+    #credits-panel{
+      position:relative;
+      width:min(720px,92vw);max-height:82vh;
+      background:linear-gradient(160deg,rgba(6,14,28,.98) 0%,rgba(10,20,38,.98) 60%,rgba(4,10,20,.98) 100%);
+      border:1px solid rgba(200,168,75,.35);
+      border-radius:14px;
+      box-shadow:0 0 0 1px rgba(255,255,255,.04),0 24px 60px rgba(0,0,0,.8),0 0 40px rgba(200,168,75,.06);
+      display:flex;flex-direction:column;overflow:hidden;
+    }
+    #credits-header{
+      padding:22px 28px 16px;
+      border-bottom:1px solid rgba(255,255,255,.07);
+      display:flex;align-items:center;justify-content:space-between;
+      flex-shrink:0;
+    }
+    #credits-title{
+      font-family:'Cinzel',serif;font-size:.85rem;letter-spacing:.18em;
+      text-transform:uppercase;color:rgba(200,168,75,.85);
+    }
+    #credits-close{
+      background:none;border:none;color:rgba(255,255,255,.35);
+      font-size:1.2rem;cursor:pointer;transition:color .2s;line-height:1;padding:2px;
+    }
+    #credits-close:hover{color:#fff;}
+    #credits-body{
+      flex:1;overflow-y:auto;padding:24px 32px 28px;
+      scrollbar-width:thin;scrollbar-color:rgba(200,168,75,.2) transparent;
+    }
+    #credits-body::-webkit-scrollbar{width:4px;}
+    #credits-body::-webkit-scrollbar-track{background:transparent;}
+    #credits-body::-webkit-scrollbar-thumb{background:rgba(200,168,75,.25);border-radius:4px;}
+    /* ── Rendu Markdown dans le panneau ── */
+    #credits-md{font-family:'EB Garamond',serif;font-size:1rem;line-height:1.75;color:rgba(255,255,255,.78);}
+    #credits-md h1{font-family:'Cinzel',serif;font-size:1.3rem;letter-spacing:.1em;color:rgba(200,168,75,.9);margin:0 0 18px;padding-bottom:10px;border-bottom:1px solid rgba(200,168,75,.2);}
+    #credits-md h2{font-family:'Cinzel',serif;font-size:1rem;letter-spacing:.08em;color:rgba(200,168,75,.75);margin:22px 0 10px;}
+    #credits-md h3{font-family:'Cinzel',serif;font-size:.85rem;letter-spacing:.06em;color:rgba(255,255,255,.55);margin:16px 0 8px;text-transform:uppercase;}
+    #credits-md p{margin:0 0 14px;}
+    #credits-md a{color:#7bc8ff;text-decoration:none;border-bottom:1px solid rgba(123,200,255,.3);transition:border-color .2s,color .2s;}
+    #credits-md a:hover{color:#aadeff;border-bottom-color:rgba(123,200,255,.7);}
+    #credits-md strong{color:rgba(255,255,255,.92);font-weight:600;}
+    #credits-md em{font-style:italic;color:rgba(235,220,185,.8);}
+    #credits-md hr{border:none;border-top:1px solid rgba(255,255,255,.08);margin:20px 0;}
+    #credits-md ul,#credits-md ol{margin:0 0 14px 20px;padding:0;}
+    #credits-md li{margin-bottom:5px;}
+    #credits-md blockquote{
+      border-left:3px solid rgba(200,168,75,.4);
+      margin:14px 0;padding:10px 16px;
+      background:rgba(200,168,75,.05);border-radius:0 6px 6px 0;
+      font-style:italic;color:rgba(235,220,185,.75);
+    }
+    #credits-md img{max-width:100%;border-radius:8px;margin:10px 0;display:block;}
+    #credits-md code{
+      background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);
+      border-radius:4px;padding:1px 6px;font-family:'Courier New',monospace;font-size:.85em;
+    }
+    #credits-md table{width:100%;border-collapse:collapse;margin:14px 0;font-size:.9rem;}
+    #credits-md th{background:rgba(200,168,75,.1);color:rgba(200,168,75,.8);padding:7px 12px;text-align:left;border-bottom:1px solid rgba(200,168,75,.2);}
+    #credits-md td{padding:6px 12px;border-bottom:1px solid rgba(255,255,255,.05);}
+    #credits-loading{
+      text-align:center;padding:40px 0;
+      font-family:'Courier New',monospace;font-size:.72rem;
+      letter-spacing:.1em;color:rgba(200,168,75,.5);
+    }
+    @keyframes spin{to{transform:rotate(360deg);}}
+    #credits-spinner{
+      width:24px;height:24px;border:2px solid rgba(200,168,75,.15);
+      border-top-color:rgba(200,168,75,.6);border-radius:50%;
+      animation:spin .8s linear infinite;margin:0 auto 12px;
+    }
+
     /* ── BOUTON PLEIN ÉCRAN ─────────────────────── */
     #fs-btn{
       position:absolute;bottom:120px;right:24px;z-index:200;
@@ -371,6 +451,12 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0a0f1a;font-family:
     #fonte-close:hover{background:rgba(255,255,255,.15);border-color:rgba(255,255,255,.5);}
     /* Masquer le menu hamburger de l'app principale quand le panneau Fonte est ouvert */
     body.fonte-open #menu-btn{ display:none!important; }
+    /* Légende : reste visible par-dessus le panneau Fonte */
+    body.fonte-open #legend-box{
+      position:fixed !important;
+      z-index:1600 !important;
+      pointer-events:all;
+    }
     #fonte-view-wrap{position:relative;width:100%;height:100%;flex:1;overflow:hidden;}
     /* IMPORTANT : cibler UNIQUEMENT le conteneur du viewer (renommé #view à l'init),
        PAS tous les divs — sinon popup/layerpanel/narrativebox s'étirent en plein écran
@@ -729,7 +815,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0a0f1a;font-family:
     <img id="perso-img" src="https://raw.githubusercontent.com/Jeomatique/antarctique/main/perso.png" alt="Guide" crossorigin="anonymous"/>
     <div id="bubble">
       <button id="bubble-close" onclick="closeCharacter()">✕</button>
-      <div id="bubble-text">Bienvenue, explorateur&nbsp;! Je suis votre guide pour ce voyage aux confins du monde. L'Antarctique vous attend — une terre de glace et de mystère.<br><br>Sélectionnez un explorateur et cliquez sur <strong>Lancer</strong>.<br>Cliquer sur  <strong>Fonte</strong> pour voir le modèle 3D !</div>
+      <div id="bubble-text">Bienvenue, explorateur&nbsp;! Je suis votre guide pour ce voyage aux confins du monde. L'Antarctique vous attend — une terre de glace et de mystère.<br><br>Sélectionnez un explorateur et cliquez sur <strong>Lancer</strong>.</div>
     </div>
   </div>
 
@@ -885,7 +971,24 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0a0f1a;font-family:
         <img src="https://raw.githubusercontent.com/Jeomatique/antarctique/main/cergy.png" alt="Université Cergy" crossorigin="anonymous"/>
       </a>
     </div>
-    <div id="footer-credit"><a href="https://google.com" target="_blank" rel="noopener">Crédits</a></div>
+    <div id="footer-credit"><a href="#" onclick="openCredits();return false;">Crédits</a></div>
+  </div>
+
+  <!-- ═══ PANNEAU CRÉDITS ═══════════════════════════ -->
+  <div id="credits-overlay" onclick="if(event.target===this)closeCredits()">
+    <div id="credits-panel">
+      <div id="credits-header">
+        <div id="credits-title">Crédits &amp; Références</div>
+        <button id="credits-close" onclick="closeCredits()">✕</button>
+      </div>
+      <div id="credits-body">
+        <div id="credits-loading">
+          <div id="credits-spinner"></div>
+          Chargement…
+        </div>
+        <div id="credits-md" style="display:none"></div>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -1259,29 +1362,37 @@ function initApp(){
     // ── Textes 3D ───────────────────────────────
     function textSizePt(tm){return Math.round(12+8*Math.log10(Math.max(1,tm/100)));}
     function buildTextGfx(lbl,opacity){
-      var sz=textSizePt(lbl.taille_m),hal=Math.max(1,Math.round(sz*0.10));
-      var a=Math.round(Math.min(1,Math.max(0,opacity))*255);
-      var haColor=[30,30,30,Math.round(Math.min(1,opacity)*220)];
-      // Callout: ligne ancrée au sol + bulle qui remonte → toujours visible
+      var sz=textSizePt(lbl.taille_m);
+      var op=Math.min(1,Math.max(0,opacity));
+      var a=Math.round(op*255);
+      // Couleur crème/beige style cartographie ancienne : [235, 220, 185]
+      // Halo très léger brun foncé (pas noir pur), taille minimale → pas de tampon dur
+      var textColor=[235,220,185,a];
+      var haloColor=[45,30,15,Math.round(op*140)]; // brun très sombre, semi-transparent
+      var haloSize=Math.max(1,Math.round(sz*0.06));  // halo fin (6% vs 10%)
+      // Callout discret : couleur or pâle très transparente
+      var calloutAlpha=Math.round(op*80);
       return new Graphic({
         geometry:new Point({longitude:lbl.midLon,latitude:lbl.midLat,z:1,spatialReference:{wkid:4326}}),
         symbol:{
           type:"point-3d",
           symbolLayers:[{
             type:"text",
-            text:lbl.text,
+            text:lbl.text.toUpperCase(), // petites capitales via toUpperCase
             size:sz,
-            font:{family:"High Tower Text, serif",weight:"normal"},
-            material:{color:[255,255,255,a]},
-            halo:{color:haColor,size:hal},
-            // verticalOffset: élève le texte au-dessus des obstacles
+            font:{
+              family:"Palatino Linotype, Palatino, Book Antiqua, EB Garamond, serif",
+              weight:"normal",
+              style:"italic"   // italique → renforce l'aspect cartographique ancien
+            },
+            material:{color:textColor},
+            halo:{color:haloColor, size:haloSize},
             verticalOffset:{screenLength:40,maxWorldLength:500000,minWorldLength:0}
           }],
-          // Callout: petit trait reliant le texte à son ancrage au sol
           callout:{
             type:"line",
             size:1,
-            color:[255,255,255,Math.round(Math.min(1,opacity)*160)],
+            color:[200,168,75,calloutAlpha], // or discret
             border:{color:[0,0,0,0]}
           }
         }
@@ -2178,6 +2289,70 @@ function _updateFsIcon(isFull){
     _updateFsIcon(isFs);
   });
 });
+
+// ── PANNEAU CRÉDITS (rendu Markdown depuis GitHub) ──
+var _creditsLoaded=false;
+
+// ⚠️  Remplacez 'credits.md' par le nom exact de votre fichier sur GitHub
+var CREDITS_MD_FILE = 'credits.md';
+
+window.openCredits=function(){
+  document.getElementById('credits-overlay').classList.add('open');
+  if(_creditsLoaded) return;
+  _loadCredits();
+};
+
+window.closeCredits=function(){
+  document.getElementById('credits-overlay').classList.remove('open');
+};
+
+// Fermer avec Échap
+document.addEventListener('keydown',function(e){
+  if(e.key==='Escape') closeCredits();
+});
+
+function _loadCredits(){
+  var url = GH + CREDITS_MD_FILE;
+  fetch(url)
+    .then(function(r){
+      if(!r.ok) throw new Error('HTTP '+r.status);
+      return r.text();
+    })
+    .then(function(md){
+      var mdEl=document.getElementById('credits-md');
+      var loading=document.getElementById('credits-loading');
+      // Utilise marked.js si disponible, sinon fallback minimal
+      if(typeof marked !== 'undefined'){
+        marked.setOptions({breaks:true, gfm:true});
+        mdEl.innerHTML = marked.parse(md);
+      } else {
+        // Fallback : conversion basique si marked.js n'est pas encore chargé
+        mdEl.innerHTML = _mdFallback(md);
+      }
+      loading.style.display='none';
+      mdEl.style.display='block';
+      _creditsLoaded=true;
+    })
+    .catch(function(err){
+      var loading=document.getElementById('credits-loading');
+      loading.innerHTML='<div style="color:rgba(255,100,100,.7);font-size:.8rem;">Impossible de charger '+CREDITS_MD_FILE+'<br><span style="opacity:.5">'+err.message+'</span></div>';
+    });
+}
+
+// Fallback minimaliste si marked.js ne charge pas (CDN indisponible)
+function _mdFallback(md){
+  return md
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/^### (.+)$/gm,'<h3>$1</h3>')
+    .replace(/^## (.+)$/gm,'<h2>$1</h2>')
+    .replace(/^# (.+)$/gm,'<h1>$1</h1>')
+    .replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>')
+    .replace(/\*(.+?)\*/g,'<em>$1</em>')
+    .replace(/\[([^\]]+)\]\(([^)]+)\)/g,'<a href="$2" target="_blank" rel="noopener">$1</a>')
+    .replace(/^---+$/gm,'<hr>')
+    .replace(/\n\n/g,'</p><p>')
+    .replace(/^/,'<p>') + '</p>';
+}
 
 // ── Sélection unifiée (portraits + thèmes = UN seul actif parmi les 4) ──
 // Chaque portrait et chaque cercle thème font partie du même groupe de sélection
