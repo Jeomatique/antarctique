@@ -2457,22 +2457,25 @@ window.openFontePanel=function(){
   document.getElementById('fonte-panel').classList.add('open');
   document.body.classList.add('fonte-open');
 
-  // ── Forcer la légende Fonte (image) quelle que soit l'état courant ──
+  // ── Légende Fonte : forcer l'image quelle que soit l'état courant ──
   var legendBox  = document.getElementById('legend-box');
   var legendBody = document.getElementById('legend-body');
   var legendImg  = document.getElementById('legend-box-img');
   var legendH4   = legendBox.querySelector('h4');
-  // Sauvegarder le contenu actuel pour le restaurer à la fermeture
+  // Sauvegarder l'état complet pour restauration à la fermeture
   legendBox._savedBodyHTML  = legendBody.innerHTML;
   legendBox._savedImgSrc    = legendImg.src;
   legendBox._savedImgShow   = legendImg.style.display;
   legendBox._savedH4        = legendH4 ? legendH4.textContent : 'Légende';
-  // Afficher la légende Fonte
+  legendBox._savedVisible   = legendBox.classList.contains('visible');
+  // Appliquer la légende Fonte : vider les items, afficher uniquement l'image
   legendBody.innerHTML = '';
   if(legendH4) legendH4.textContent = 'Légende — Fonte';
   legendImg.src = GH + 'legende_fonte.png';
   legendImg.style.display = 'block';
-  legendBox.classList.add('visible'); // s'assurer qu'elle est visible
+  // Forcer l'affichage (visible même si personnage pas encore fermé)
+  legendBox.classList.add('visible');
+  legendBox.style.pointerEvents = 'all';
 
   if(_fonteInited) return;
 
@@ -2547,16 +2550,21 @@ window.closeFontePanel=function(){
   document.getElementById('fonte-panel').classList.remove('open');
   document.body.classList.remove('fonte-open');
 
-  // ── Restaurer la légende précédente ──
+  // ── Restaurer la légende dans son état d'avant Fonte ──
   var legendBox  = document.getElementById('legend-box');
   var legendBody = document.getElementById('legend-body');
   var legendImg  = document.getElementById('legend-box-img');
   var legendH4   = legendBox.querySelector('h4');
   if(legendBox._savedBodyHTML !== undefined){
-    legendBody.innerHTML       = legendBox._savedBodyHTML;
-    legendImg.src              = legendBox._savedImgSrc || '';
-    legendImg.style.display    = legendBox._savedImgShow || 'none';
+    legendBody.innerHTML    = legendBox._savedBodyHTML;
+    legendImg.src           = legendBox._savedImgSrc || '';
+    legendImg.style.display = legendBox._savedImgShow || 'none';
     if(legendH4) legendH4.textContent = legendBox._savedH4 || 'Légende';
+    // Restaurer la visibilité : si elle était cachée avant, la recacher
+    if(!legendBox._savedVisible){
+      legendBox.classList.remove('visible');
+      legendBox.style.pointerEvents = 'none';
+    }
   }
 };
 </script>
