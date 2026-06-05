@@ -102,6 +102,7 @@ Edwards, T.L. *et al.* (2021) *Projected land ice contributions to twenty-first-
 | Three.js | Rendu WebGL interactif |
 | GitHub | Hébergement des données et du code |
 | Vercel | Déploiement de l'application web |
+| Claude | Codage : HTML, CSS, JSS |
 
 ---
 
