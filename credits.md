@@ -50,7 +50,7 @@ Le Brocq, A.M., Payne, A.J. et Vieli, A. (2010) *ALBMAP Lower Ice Surface Elevat
 
 ### Population des manchots empereurs
 
-<p align="center"><img src="https://raw.githubusercontent.com/Jeomatique/antarctique/main/CREDIT_4.jpg" alt="Colonies de manchots empereurs" width="420"/></p>
+<p align="center"><img src="https://raw.githubusercontent.com/Jeomatique/antarctique/main/CREDIT_4.png" alt="Colonies de manchots empereurs" width="420"/></p>
 
 Fretwell, P.T., LaRue, M.A., Morin, P., Kooyman, G.L., Wienecke, B., Ratcliffe, N., Fox, A.J., Fleming, A.H., Porter, C. et Trathan, P.N. (2012) *Emperor penguin colonies and population estimates derived from very high-resolution satellite imagery* (saison de reproduction 2009). *PLoS ONE*, 7(4), e33751.
  [doi:10.1371/journal.pone.0033751](https://doi.org/10.1371/journal.pone.0033751) · [Télécharger via Quantarctica](https://media.npolar.no/download/quantarctica/Quantarctica3/Biology/Emperor%20Penguin%20Colonies/)
@@ -59,7 +59,7 @@ Fretwell, P.T., LaRue, M.A., Morin, P., Kooyman, G.L., Wienecke, B., Ratcliffe, 
 
 ### Taux de variation de l'épaisseur de la glace (2011–2100)
 
-<p align="center"><img src="https://raw.githubusercontent.com/Jeomatique/antarctique/main/CREDIT_5.jpg" alt="Variation épaisseur glace" width="420"/></p>
+<p align="center"><img src="https://raw.githubusercontent.com/Jeomatique/antarctique/main/CREDIT_5.png" alt="Variation épaisseur glace" width="420"/></p>
 
 O'Neill, J.F. (2024) *ISMIP6_TD58_8km : Antarctic ice-sheet projection dataset on an 8 km grid*. Dans : *Data for "ISMIP6-based Antarctic Projections to 2100 : simulations with the BISICLES ice sheet model"*. Zenodo.
  [doi:10.5281/zenodo.13880450](https://doi.org/10.5281/zenodo.13880450)
