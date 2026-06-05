@@ -13,7 +13,7 @@ Réalisé par les étudiants du **Master 1 Géomatique** — parcours *Géomatiq
 
 ## Remerciements
 
-Nos plus grands remerciements au programme **[UTOPIAS by SWEN Capital Partners](https://www.swencapitalpartners.fr/)**, spécialisée dans l'investissement responsable et la finance durable.
+Nos plus grands remerciements au programme **[UTOPIAS by SWEN Capital Partners](https://utopias.swen-cp.fr/)**, spécialisée dans l'investissement responsable et la finance durable.
 
 Nous remercions le **Palais de la Porte Dorée (Paris)** de nous avoir accueillis ce 8 juin 2026.
 
