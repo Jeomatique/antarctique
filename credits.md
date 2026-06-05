@@ -108,7 +108,7 @@ Edwards, T.L. *et al.* (2021) *Projected land ice contributions to twenty-first-
 
 ## Quantarctica
 
-🔗 [npolar.no/en/quantarctica](https://npolar.no/en/quantarctica/)
+ [npolar.no/en/quantarctica](https://npolar.no/en/quantarctica/)
 
 **Quantarctica** est un package SIG libre développé par le *Norwegian Polar Institute*, rassemblant des données géographiques et scientifiques sur l'Antarctique dans QGIS. Il intègre de nombreux jeux de données thématiques — glaciologie, océanographie, climatologie, géologie, biodiversité — pour soutenir la recherche en Antarctique.
 
