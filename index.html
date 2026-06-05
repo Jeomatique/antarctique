@@ -280,6 +280,55 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0a0f1a;font-family:
       box-shadow:0 4px 24px rgba(0,0,0,.8);
     }
 
+    /* ── FENÊTRE FLOTTANTE OUTILS DEBUG ─────────── */
+    #dbg-tools{
+      position:fixed;bottom:28px;left:8px;z-index:3002;
+      background:rgba(2,8,16,0.97);border:1px solid rgba(0,200,180,0.4);
+      border-radius:8px;padding:10px 14px 12px;
+      font-family:'Courier New',monospace;font-size:.62rem;color:#00c8b4;
+      pointer-events:all;box-shadow:0 4px 20px rgba(0,0,0,.8);
+      display:none;min-width:160px;
+    }
+    #dbg-tools.open{display:block;}
+    #dbg-tools-title{
+      font-size:.55rem;letter-spacing:.14em;text-transform:uppercase;
+      color:rgba(0,200,180,.45);margin-bottom:8px;
+      border-bottom:1px solid rgba(0,200,180,.12);padding-bottom:5px;
+      display:flex;justify-content:space-between;align-items:center;
+    }
+    #dbg-tools-close{background:none;border:none;color:rgba(0,200,180,.3);cursor:pointer;font-size:.85rem;padding:0;line-height:1;}
+    #dbg-tools-close:hover{color:var(--teal);}
+    .dbg-toggle-row{
+      display:flex;align-items:center;gap:9px;
+      padding:5px 0;cursor:pointer;user-select:none;
+      border-bottom:1px solid rgba(255,255,255,.04);
+    }
+    .dbg-toggle-row:last-child{border-bottom:none;padding-bottom:0;}
+    .dbg-toggle-row:hover .dbg-switch-track{border-color:rgba(0,200,180,.6);}
+    .dbg-switch-track{
+      width:30px;height:16px;border-radius:8px;
+      background:rgba(0,200,180,.12);border:1px solid rgba(0,200,180,.25);
+      position:relative;transition:background .2s,border-color .2s;flex-shrink:0;
+    }
+    .dbg-switch-track.on{background:rgba(0,200,180,.35);border-color:rgba(0,200,180,.7);}
+    .dbg-switch-knob{
+      position:absolute;top:2px;left:2px;
+      width:10px;height:10px;border-radius:50%;
+      background:rgba(0,200,180,.5);transition:left .18s,background .18s;
+    }
+    .dbg-switch-track.on .dbg-switch-knob{left:16px;background:#00c8b4;}
+    .dbg-toggle-label{font-size:.64rem;letter-spacing:.05em;color:rgba(255,255,255,.7);}
+    .dbg-status-dot{
+      width:6px;height:6px;border-radius:50%;flex-shrink:0;
+      background:rgba(0,200,180,.3);transition:background .2s;margin-left:auto;
+    }
+    .dbg-switch-track.on ~ .dbg-status-dot{background:#00c8b4;}
+    .dbg-toggle-row.on .dbg-status-dot{background:#00c8b4;}
+    #dbg-tools-hint{
+      margin-top:9px;font-size:.52rem;color:rgba(255,255,255,.25);
+      line-height:1.4;letter-spacing:.03em;
+    }
+
     /* ── PANNEAU CAMÉRA HUD ─────────────────────── */
     #cam-hud{
       position:fixed;top:102px;right:8px;z-index:2500;
@@ -819,6 +868,29 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0a0f1a;font-family:
     </div>
   </div>
 
+  <!-- Fenêtre flottante outils debug -->
+  <div id="dbg-tools">
+    <div id="dbg-tools-title">
+      <span>🔬 Diagnostic</span>
+      <button id="dbg-tools-close" onclick="toggleDbgTools()">✕</button>
+    </div>
+    <div class="dbg-toggle-row on" id="dbg-row-citation" onclick="toggleDbgFeature('citation')">
+      <div class="dbg-switch-track on" id="dbg-track-citation">
+        <div class="dbg-switch-knob"></div>
+      </div>
+      <span class="dbg-toggle-label">Citation</span>
+      <div class="dbg-status-dot" id="dbg-dot-citation"></div>
+    </div>
+    <div class="dbg-toggle-row on" id="dbg-row-bulle" onclick="toggleDbgFeature('bulle')">
+      <div class="dbg-switch-track on" id="dbg-track-bulle">
+        <div class="dbg-switch-knob"></div>
+      </div>
+      <span class="dbg-toggle-label">Bulle info</span>
+      <div class="dbg-status-dot" id="dbg-dot-bulle"></div>
+    </div>
+    <div id="dbg-tools-hint">Désactiver un élément pour<br>isoler la source du problème</div>
+  </div>
+
   <!-- Bouton debug -->
   <button id="debug-toggle" onclick="toggleDebug()">⬛ DEBUG</button>
   <div id="debug-panel">
@@ -1346,6 +1418,7 @@ function initApp(){
         var lon=g.coordinates[0], lat=g.coordinates[1];
         iconeFeats.push({lon:lon,lat:lat,etape:etape,texte:texte,visible:false,gfxArr:[]});
       });
+      dlog('ok','Icônes chargées: '+iconeFeats.length+' points');
     }
 
     // ── Citations ────────────────────────────────
@@ -1358,6 +1431,7 @@ function initApp(){
         var lon=g.coordinates[0],lat=g.coordinates[1];
         citFeats.push({lon:lon,lat:lat,etape:etape,texte:texte,visible:false,typed:false});
       });
+      dlog('ok','Citations chargées: '+citFeats.length+' points');
     }
 
     // ── Textes 3D ───────────────────────────────
@@ -1554,9 +1628,17 @@ function initApp(){
     }
 
     // Animation des cercles pulsants
+    var _animIconesLogCount=0;
     function animIcones(){
       iconeAnimFrame=requestAnimationFrame(animIcones);
+      // ── Désactivé via panneau debug : ne pas animer ──
+      if(!window._dbgBulleON) return;
       iconeAnimT+=0.016;
+      // Log périodique pour confirmer que l'animation tourne (toutes les ~5s)
+      _animIconesLogCount++;
+      if(_animIconesLogCount % 300 === 1){
+        dlog('info','animIcones alive — icônes actives: '+iconeFeats.filter(function(f){return f.visible;}).length);
+      }
       iconeFeats.forEach(function(feat){
         if(!feat.visible||feat.gfxArr.length<3) return;
         // gfxArr: [0]=stem, [1]=marker(+i), [2..4]=cercles polygone sur le globe
@@ -1568,10 +1650,14 @@ function initApp(){
           var alpha=(1-phase)*0.8;
           // Mettre à jour la geometry (cercle géodésique)
           g.geometry=buildCircleGeom(g._centerLon,g._centerLat,radiusKm);
-          // Mettre à jour l'opacité via symbol
-          var sym=g.symbol.clone();
-          sym.symbolLayers.items[0].material={color:[100,180,255,alpha]};
-          g.symbol=sym;
+          // Mettre à jour l'opacité via symbol — try/catch : symbol.clone() peut crasher sur Safari/WebGL mobile
+          try{
+            var sym=g.symbol.clone();
+            sym.symbolLayers.items[0].material={color:[100,180,255,alpha]};
+            g.symbol=sym;
+          } catch(e){
+            dlog('err','animIcones symbol.clone() crash: '+e.message+' | Bulle ci='+ci);
+          }
         }
       });
     }
@@ -1613,14 +1699,17 @@ function initApp(){
           if(feat.visible){ feat.visible=false; feat.everSeen=false; buildIconeGfx(feat); }
           return;
         }
+        // ── Désactivé via panneau debug ──
+        if(!window._dbgBulleON) return;
         // Dans l'étape: visible si déjà vu OU si maintenant à moins de 40km
         if(!feat.everSeen && boatLon!=null){
           var dist=hav({lon:boatLon,lat:boatLat},{lon:feat.lon,lat:feat.lat});
-          if(dist<=40) feat.everSeen=true;
+          if(dist<=40){ feat.everSeen=true; dlog('info','Bulle info visible à '+dist.toFixed(1)+'km (étape '+etape+')'); }
         }
         var shouldBeVisible=inEtape && feat.everSeen;
         if(shouldBeVisible!==feat.visible){
           feat.visible=shouldBeVisible;
+          if(shouldBeVisible) dlog('info','Bulle info → affichage [étape '+etape+']');
           buildIconeGfx(feat);
         }
       });
@@ -1656,6 +1745,12 @@ function initApp(){
 
     function showCitation(feat){
       if(feat.visible) return;
+      // ── Désactivé via panneau debug ──
+      if(!window._dbgCitationON){
+        dlog('warn','Citation bloquée (désactivée): '+feat.texte.substring(0,30));
+        return;
+      }
+      dlog('info','Citation → affichage: '+feat.texte.substring(0,40)+'…');
       feat.visible=true;
       feat._displayedText='';  // texte affiché jusqu'ici
       feat._typeIdx=0;         // index du prochain char
@@ -1686,6 +1781,8 @@ function initApp(){
     function drawAllCitations(){
       if(!citCanvas||!citCtx) return;
       citCtx.clearRect(0,0,citCanvas.width,citCanvas.height);
+      // ── Désactivé via panneau debug ──
+      if(!window._dbgCitationON) return;
       citFeats.forEach(function(feat){
         if(!feat.visible||!feat._displayedText) return;
         var pt=new Point({longitude:feat.lon,latitude:feat.lat,spatialReference:{wkid:4326}});
@@ -2223,10 +2320,68 @@ function initApp(){
 //  PANNEAU DEBUG
 // ══════════════════════════════════════════════
 var _dbgOpen=false;
+
+// ── Flags de désactivation pour le diagnostic ──
+window._dbgCitationON = true;  // true = Citations actives
+window._dbgBulleON    = true;  // true = Bulles info actives
+
+window.toggleDbgTools=function(){
+  var panel=document.getElementById('dbg-tools');
+  panel.classList.toggle('open');
+};
+
+window.toggleDbgFeature=function(feature){
+  var isOn, trackEl, rowEl;
+  if(feature==='citation'){
+    window._dbgCitationON = !window._dbgCitationON;
+    isOn = window._dbgCitationON;
+    trackEl = document.getElementById('dbg-track-citation');
+    rowEl   = document.getElementById('dbg-row-citation');
+    // Si on désactive : cacher toutes les citations actives
+    if(!isOn){
+      if(typeof citFeats !== 'undefined'){
+        citFeats.forEach(function(f){ if(f.visible) hideCitation(f); });
+      }
+      // Effacer le canvas
+      if(typeof citCtx !== 'undefined' && citCtx && typeof citCanvas !== 'undefined' && citCanvas){
+        citCtx.clearRect(0,0,citCanvas.width,citCanvas.height);
+      }
+    }
+    dlog(isOn?'ok':'warn','Citation → '+(isOn?'ACTIVÉ':'DÉSACTIVÉ'));
+  } else if(feature==='bulle'){
+    window._dbgBulleON = !window._dbgBulleON;
+    isOn = window._dbgBulleON;
+    trackEl = document.getElementById('dbg-track-bulle');
+    rowEl   = document.getElementById('dbg-row-bulle');
+    // Si on désactive : masquer tous les graphiques icônes
+    if(!isOn && typeof iconeFeats !== 'undefined'){
+      iconeFeats.forEach(function(feat){
+        feat.gfxArr.forEach(function(g){ g.visible=false; });
+      });
+      // Fermer le popup info s'il est ouvert
+      var popup=document.getElementById('info-popup');
+      if(popup) popup.classList.remove('open');
+    } else if(isOn && typeof iconeFeats !== 'undefined'){
+      // Réactiver les icônes visibles
+      iconeFeats.forEach(function(feat){
+        if(feat.visible) feat.gfxArr.forEach(function(g){ g.visible=true; });
+      });
+    }
+    dlog(isOn?'ok':'warn','Bulle info → '+(isOn?'ACTIVÉ':'DÉSACTIVÉ'));
+  }
+  // Mettre à jour le visuel du switch
+  if(trackEl){
+    trackEl.classList.toggle('on', isOn);
+    if(rowEl) rowEl.classList.toggle('on', isOn);
+  }
+};
+
 window.toggleDebug=function(){
   _dbgOpen=!_dbgOpen;
   document.getElementById('debug-panel').classList.toggle('open',_dbgOpen);
   document.getElementById('debug-toggle').textContent=_dbgOpen?'⬛ DEBUG (ON)':'⬛ DEBUG';
+  // Ouvrir/fermer la fenêtre outils en même temps
+  document.getElementById('dbg-tools').classList.toggle('open',_dbgOpen);
 };
 window.clearDbgLog=function(){ document.getElementById('dbg-log').innerHTML=''; };
 window.copyDebugLog=function(){
