@@ -287,9 +287,27 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0a0f1a;font-family:
       border-radius:8px;padding:10px 14px 12px;
       font-family:'Courier New',monospace;font-size:.62rem;color:#00c8b4;
       pointer-events:all;box-shadow:0 4px 20px rgba(0,0,0,.8);
-      display:none;min-width:160px;
+      display:none;min-width:220px;
     }
     #dbg-tools.open{display:block;}
+    /* ── Ligne commande debug ── */
+    #dbg-cmd-row{display:flex;gap:4px;margin-top:8px;padding-top:7px;border-top:1px solid rgba(0,200,180,.1);}
+    #dbg-cmd-input{
+      flex:1;min-width:0;
+      background:rgba(0,200,180,.06);border:1px solid rgba(0,200,180,.22);
+      border-radius:3px;color:#00c8b4;
+      font-family:'Courier New',monospace;font-size:.55rem;
+      padding:4px 6px;outline:none;letter-spacing:.03em;
+    }
+    #dbg-cmd-input::placeholder{color:rgba(0,200,180,.25);font-style:italic;font-size:.5rem;}
+    #dbg-cmd-input:focus{border-color:rgba(0,200,180,.55);background:rgba(0,200,180,.1);}
+    #dbg-cmd-btn{
+      background:rgba(0,200,180,.1);border:1px solid rgba(0,200,180,.3);
+      border-radius:3px;cursor:pointer;padding:3px 8px;
+      font-size:.75rem;line-height:1;flex-shrink:0;
+      transition:background .15s,border-color .15s;
+    }
+    #dbg-cmd-btn:hover{background:rgba(0,200,180,.25);border-color:rgba(0,200,180,.6);}
     #dbg-tools-title{
       font-size:.55rem;letter-spacing:.14em;text-transform:uppercase;
       color:rgba(0,200,180,.45);margin-bottom:8px;
@@ -931,7 +949,13 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0a0f1a;font-family:
       <span class="dbg-toggle-label">Relief terrain</span>
       <div class="dbg-status-dot" id="dbg-dot-relief"></div>
     </div>
-    <button class="dbg-action-btn" onclick="if(window._dbgHardReset){window._dbgHardReset();}else{dlog('warn','Hard reset non disponible — ArcGIS pas encore chargé');}">⟳ Hard reset mémoire</button>
+    <div id="dbg-cmd-row">
+      <input id="dbg-cmd-input" type="text" value="E:1=2;2=15;3=7" placeholder="E:1=2;2=10 | T:1=20 | B:1=5000"
+        maxlength="120" spellcheck="false" autocomplete="off" autocorrect="off" autocapitalize="off"
+        oninput="this.value=this.value.replace(/[^A-Za-z0-9:=;.]/g,'')"/>
+      <button id="dbg-cmd-btn" title="Valider la commande"
+        onclick="if(window._dbgApplyCmd){window._dbgApplyCmd(document.getElementById('dbg-cmd-input').value);}else{dlog('warn','Commande non disponible — ArcGIS pas encore chargé');}">✅</button>
+    </div>
     <div id="dbg-mem-row">
       <span class="dbg-mem-lbl">Trail pts</span><span class="dbg-mem-val" id="dbg-mem-trail">—</span>
       <span class="dbg-mem-lbl">Icônes vis.</span><span class="dbg-mem-val" id="dbg-mem-icones">—</span>
@@ -2005,11 +2029,25 @@ function initApp(){
       if(distCovered>=st.totalDist){
         isPlaying=false;
         if(rect){rect.classList.remove('active');rect.classList.add('done');rect.querySelector('.stage-progress').style.width='100%';}
-        updateIcones(-1,null,null); // cacher les icones
-        citFeats.forEach(function(f){hideCitation(f);});
         if(currentStage<stages.length-1){
-          // msg supprimé
-          pauseTimer=setTimeout(function(){currentStage++;startStage(currentStage);},PAUSE_BETWEEN_S*1000);
+          // Délai configurable : E:1=2;2=10 ou PAUSE_BETWEEN_S global par défaut
+          var _pDelay=(window._dbgPauseOverrides&&window._dbgPauseOverrides[st.etape]!==undefined)
+            ?window._dbgPauseOverrides[st.etape]:PAUSE_BETWEEN_S;
+          pauseTimer=setTimeout(function(){
+            currentStage++;
+            // ── Téléportation caméra automatique vers la nouvelle étape ──
+            if(stages[currentStage]){
+              var _ne=stages[currentStage].etape;
+              var _cf=CAMERA_ETAPE[_ne];
+              if(_cf&&_cf.length>=5){
+                view.goTo({position:{longitude:_cf[0],latitude:_cf[1],z:_cf[2]},tilt:_cf[3],heading:_cf[4]},{duration:1200});
+              } else {
+                var _nc=stages[currentStage].coords[0];
+                view.goTo({position:{longitude:_nc[0],latitude:_nc[1],z:80000},tilt:55},{duration:1200});
+              }
+            }
+            startStage(currentStage);
+          },_pDelay*1000);
         }else{msg('Arrive a destination !');document.getElementById('btnPlay').textContent='▶ Rejouer';}
         return;
       }
@@ -2018,13 +2056,33 @@ function initApp(){
 
     function startStage(idx){
       if(idx>=stages.length)return;
+      var _prevEtape=currentStageEtape;
       currentStage=idx;distCovered=0;prevDist=0;trailPts=[];lastTs=null;isPlaying=true;
       currentStageEtape=stages[idx].etape;
-      // Masquer TOUS les labels avant de commencer la nouvelle étape
+      // ── Nettoyer icônes et citations de l'étape précédente ──
+      // Placé ici (et non à la fin de animLoop) pour que labels/icônes/citations
+      // restent visibles pendant toute la durée de la pause inter-étapes.
+      updateIcones(-1,null,null);
+      citFeats.forEach(function(f){hideCitation(f);});
+      // ── Reset complet des labels : opacity + flags d'animation ──
+      // CRUCIAL : sans reset de `activated` et `activationTime`, animLabelFade()
+      // recalcule progress=1 dès la frame suivante et re-montre les labels.
+      // C'est la cause des bugs "labels persistants" et "labels de la mauvaise étape".
       textLabels.forEach(function(lbl){
-        var st=labelStates[lbl.text];
-        if(st&&st.opacity!==0){st.opacity=0;updateTextLabel(lbl,0);}
+        var ls=labelStates[lbl.text];
+        if(ls){
+          if(ls.opacity!==0) updateTextLabel(lbl,0);
+          ls.opacity=0; ls.activated=false; ls.activationTime=null;
+        }
       });
+      // ── Basemap temporaire : satellite pour étape 3, vectoriel sinon ──
+      if(currentStageEtape===3 && _prevEtape!==3){
+        view.map.basemap='satellite';
+        dlog('info','Basemap → satellite (étape 3)');
+      } else if(currentStageEtape!==3 && _prevEtape===3){
+        view.map.basemap='dark-gray-vector';
+        dlog('info','Basemap → vectoriel (fin étape 3)');
+      }
       buildTrailGfx(stages[idx].boatHeight);
       updateRectHighlight(idx);autoScrollToStage(idx);
       document.getElementById('btnPlay').textContent='⏸ Pause';
@@ -2353,7 +2411,7 @@ function initApp(){
     }
     view.when(function(){
       initCitCanvas();
-      // ── Exposition des stats mémoire pour le moniteur debug ──
+      // ── Stats mémoire pour le moniteur debug ──
       window._dbgGetStats=function(){
         return{
           trail:  trailPts  ? trailPts.length  : 0,
@@ -2361,20 +2419,40 @@ function initApp(){
           cit:    citFeats   ? citFeats.filter(function(f){return f.visible;}).length   : 0
         };
       };
-      // ── Hard reset : vide tous les buffers WebGL + recharge depuis GitHub ──
-      // Appelle loadExplorer() qui : annule les RAF, removeAll() sur chaque layer,
-      // vide les tableaux JS, puis refetch et reconstruit tout.
-      window._dbgHardReset=function(){
-        dlog('warn','⟳ Hard reset — purge buffers WebGL + rechargement...');
-        var found=null;
-        for(var i=0;i<EXPLORERS.length;i++){
-          if(EXPLORERS[i].id===activeExplorer){found=EXPLORERS[i];break;}
+      // ── Parseur de commandes debug (E: T: B:) ──────────────────────────────
+      // E:1=2;2=10;3=10  → délai (s) après chaque étape (par numéro d'étape)
+      // T:1=20;2=30      → durée de traversée (s) de chaque étape
+      // B:1=5000;2=2000  → taille du bateau (boat_t) de chaque étape
+      window._dbgApplyCmd=function(text){
+        if(!text||!text.trim()){dlog('warn','Cmd: vide');return;}
+        text=text.trim();
+        var cmd=text.charAt(0).toUpperCase();
+        if(text.length<3||text.charAt(1)!==':'){
+          dlog('err','Format invalide — ex: E:1=2;2=10 | T:1=20 | B:1=5000');return;
         }
-        if(found){
-          loadExplorer(found);
-          dlog('ok','Hard reset lancé pour : '+found.label);
+        var pairs=text.substring(2).split(';');
+        var parsed={};
+        for(var i=0;i<pairs.length;i++){
+          var p=pairs[i].trim().split('=');
+          if(p.length===2){var k=parseInt(p[0],10),v=parseFloat(p[1]);if(!isNaN(k)&&!isNaN(v))parsed[k]=v;}
+        }
+        var hasAny=false; for(var k in parsed){hasAny=true;break;}
+        if(!hasAny){dlog('err','Cmd '+cmd+': aucune paire valide (ex: 1=10)');return;}
+        if(cmd==='E'){
+          window._dbgPauseOverrides=parsed;
+          dlog('ok','E: délais entre étapes → '+JSON.stringify(parsed)+'s');
+        } else if(cmd==='T'){
+          stages.forEach(function(st){
+            if(parsed[st.etape]!==undefined){st.duree=parsed[st.etape];}
+          });
+          dlog('ok','T: durées MAJ → '+JSON.stringify(parsed)+'s');
+        } else if(cmd==='B'){
+          stages.forEach(function(st){
+            if(parsed[st.etape]!==undefined){st.boatHeight=parsed[st.etape];st.boatZ=parsed[st.etape]/100*42;}
+          });
+          dlog('ok','B: tailles bateau MAJ → '+JSON.stringify(parsed));
         } else {
-          dlog('err','Hard reset : explorateur introuvable (id='+activeExplorer+')');
+          dlog('err','Commande "'+cmd+'" inconnue — attendu : E, T ou B');
         }
       };
       var firstExp=EXPLORERS[0];
@@ -2399,6 +2477,7 @@ window._dbgBulleON    = true;   // true = Bulles info actives
 window._dbgQualityLow = false;  // false = high (défaut), true = low
 window._dbgThrottle   = false;  // false = 60fps (défaut), true = throttle ~15fps
 window._dbgRelief     = true;   // true = world-elevation actif, false = globe lisse
+window._dbgPauseOverrides = {1:2,2:15,3:7}; // délais (s) après chaque étape — modifiable via E:1=2;2=15;3=7
 
 window.toggleDbgTools=function(){
   var panel=document.getElementById('dbg-tools');
