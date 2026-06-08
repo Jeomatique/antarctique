@@ -328,6 +328,26 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0a0f1a;font-family:
       margin-top:9px;font-size:.52rem;color:rgba(255,255,255,.25);
       line-height:1.4;letter-spacing:.03em;
     }
+    /* ── Séparateur visuel dans le panneau debug ── */
+    .dbg-sep{height:1px;background:rgba(0,200,180,.12);margin:8px 0 4px;}
+    /* ── Bouton action réinitialisation ── */
+    .dbg-action-btn{
+      width:100%;margin-top:7px;padding:5px 0;
+      background:rgba(255,80,80,.07);border:1px solid rgba(255,110,110,.22);
+      border-radius:4px;color:rgba(255,140,140,.75);
+      font-family:'Courier New',monospace;font-size:.58rem;
+      letter-spacing:.1em;text-transform:uppercase;cursor:pointer;
+      transition:background .18s,border-color .18s;
+    }
+    .dbg-action-btn:hover{background:rgba(255,80,80,.18);border-color:rgba(255,110,110,.5);color:rgba(255,160,160,.95);}
+    /* ── Compteur objets GPU (grille 2 colonnes) ── */
+    #dbg-mem-row{
+      margin-top:8px;padding:7px 0 0;
+      border-top:1px solid rgba(0,200,180,.1);
+      display:grid;grid-template-columns:1fr auto;gap:3px 10px;
+    }
+    .dbg-mem-lbl{font-size:.5rem;color:rgba(255,255,255,.28);letter-spacing:.06em;text-transform:uppercase;align-self:center;}
+    .dbg-mem-val{font-size:.6rem;color:rgba(0,200,180,.75);text-align:right;font-family:'Courier New',monospace;font-weight:bold;}
 
     /* ── PANNEAU CAMÉRA HUD ─────────────────────── */
     #cam-hud{
@@ -888,6 +908,35 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0a0f1a;font-family:
       <span class="dbg-toggle-label">Bulle info</span>
       <div class="dbg-status-dot" id="dbg-dot-bulle"></div>
     </div>
+    <div class="dbg-sep"></div>
+    <div class="dbg-toggle-row" id="dbg-row-quality" onclick="toggleDbgFeature('quality')">
+      <div class="dbg-switch-track" id="dbg-track-quality">
+        <div class="dbg-switch-knob"></div>
+      </div>
+      <span class="dbg-toggle-label">Qualité Low</span>
+      <div class="dbg-status-dot" id="dbg-dot-quality"></div>
+    </div>
+    <div class="dbg-toggle-row" id="dbg-row-throttle" onclick="toggleDbgFeature('throttle')">
+      <div class="dbg-switch-track" id="dbg-track-throttle">
+        <div class="dbg-switch-knob"></div>
+      </div>
+      <span class="dbg-toggle-label">Throttle 15fps</span>
+      <div class="dbg-status-dot" id="dbg-dot-throttle"></div>
+    </div>
+    <div class="dbg-sep"></div>
+    <div class="dbg-toggle-row on" id="dbg-row-relief" onclick="toggleDbgFeature('relief')">
+      <div class="dbg-switch-track on" id="dbg-track-relief">
+        <div class="dbg-switch-knob"></div>
+      </div>
+      <span class="dbg-toggle-label">Relief terrain</span>
+      <div class="dbg-status-dot" id="dbg-dot-relief"></div>
+    </div>
+    <button class="dbg-action-btn" onclick="if(window._dbgHardReset){window._dbgHardReset();}else{dlog('warn','Hard reset non disponible — ArcGIS pas encore chargé');}">⟳ Hard reset mémoire</button>
+    <div id="dbg-mem-row">
+      <span class="dbg-mem-lbl">Trail pts</span><span class="dbg-mem-val" id="dbg-mem-trail">—</span>
+      <span class="dbg-mem-lbl">Icônes vis.</span><span class="dbg-mem-val" id="dbg-mem-icones">—</span>
+      <span class="dbg-mem-lbl">Citations vis.</span><span class="dbg-mem-val" id="dbg-mem-cit">—</span>
+    </div>
     <div id="dbg-tools-hint">Désactiver un élément pour<br>isoler la source du problème</div>
   </div>
 
@@ -1253,7 +1302,7 @@ function initApp(){
       camera:{position:[0,-75,4000000],tilt:15},
       qualityProfile:"high",
       environment:{
-        atmosphere:{quality:"high"},
+        atmosphere:{quality:"low"},
         lighting:{
           date:new Date("2024-12-21T14:00:00Z"),
           directShadowsEnabled:false,
@@ -1262,12 +1311,21 @@ function initApp(){
       }
     });
 
-    // Ombres selon altitude
+    // ── Watcher caméra : HUD uniquement, debounce 100ms ──
+    var _camWatchLastHudMs=0;
     view.watch("camera",function(cam){
-      var on=cam.position.z>SHADOW_DISABLE_ALT;
-      if(view.environment.lighting.directShadowsEnabled!==on){
-        view.environment={atmosphere:view.environment.atmosphere,lighting:{date:view.environment.lighting.date,directShadowsEnabled:on,cameraTrackingEnabled:false}};
-      }
+      var _now=performance.now();
+      if(_now-_camWatchLastHudMs<100) return;
+      _camWatchLastHudMs=_now;
+      if(!document.getElementById('cam-hud').classList.contains('open')) return;
+      var p=cam.position;
+      document.getElementById('chud-lon').textContent  = p.longitude.toFixed(6);
+      document.getElementById('chud-lat').textContent  = p.latitude.toFixed(6);
+      document.getElementById('chud-z').textContent    = Math.round(p.z).toLocaleString('fr-FR');
+      document.getElementById('chud-tilt').textContent = cam.tilt.toFixed(2);
+      document.getElementById('chud-head').textContent = cam.heading.toFixed(2);
+      var etapeEl=document.getElementById('cam-etape-badge');
+      if(etapeEl) etapeEl.textContent='Étape active : '+(currentStageEtape||'—');
     });
 
     // Layers : textLayer et iconeLayer AVANT boatLayer → bateau cache tout
@@ -1628,12 +1686,16 @@ function initApp(){
     }
 
     // Animation des cercles pulsants
-    var _animIconesLogCount=0;
+    var _animIconesLogCount=0, _animThrottleCount=0;
     function animIcones(){
       iconeAnimFrame=requestAnimationFrame(animIcones);
       // ── Désactivé via panneau debug : ne pas animer ──
       if(!window._dbgBulleON) return;
+      _animThrottleCount++;
+      // iconeAnimT avance à 60fps (rythme de pulsation constant)
       iconeAnimT+=0.016;
+      // ── Throttle ~15fps : sauter 3 updates GPU sur 4 (60÷4=15) ──
+      if(window._dbgThrottle && _animThrottleCount%4!==0) return;
       // Log périodique pour confirmer que l'animation tourne (toutes les ~5s)
       _animIconesLogCount++;
       if(_animIconesLogCount % 300 === 1){
@@ -2098,20 +2160,6 @@ function initApp(){
 
     window._arcgisView = view;
 
-    // ── HUD Caméra : mise à jour en temps réel ──────
-    // Surveille chaque changement de caméra pour mettre à jour l'affichage
-    view.watch("camera", function(cam){
-      if(!document.getElementById('cam-hud').classList.contains('open')) return;
-      var p=cam.position;
-      document.getElementById('chud-lon').textContent  = p.longitude.toFixed(6);
-      document.getElementById('chud-lat').textContent  = p.latitude.toFixed(6);
-      document.getElementById('chud-z').textContent    = Math.round(p.z).toLocaleString('fr-FR');
-      document.getElementById('chud-tilt').textContent = cam.tilt.toFixed(2);
-      document.getElementById('chud-head').textContent = cam.heading.toFixed(2);
-      var etapeEl=document.getElementById('cam-etape-badge');
-      if(etapeEl) etapeEl.textContent='Étape active : '+(currentStageEtape||'—');
-    });
-
     // Forcer une mise à jour initiale quand le HUD s'ouvre
     window._hudRefreshCam=function(){
       if(!window._arcgisView) return;
@@ -2305,6 +2353,30 @@ function initApp(){
     }
     view.when(function(){
       initCitCanvas();
+      // ── Exposition des stats mémoire pour le moniteur debug ──
+      window._dbgGetStats=function(){
+        return{
+          trail:  trailPts  ? trailPts.length  : 0,
+          icones: iconeFeats ? iconeFeats.filter(function(f){return f.visible;}).length : 0,
+          cit:    citFeats   ? citFeats.filter(function(f){return f.visible;}).length   : 0
+        };
+      };
+      // ── Hard reset : vide tous les buffers WebGL + recharge depuis GitHub ──
+      // Appelle loadExplorer() qui : annule les RAF, removeAll() sur chaque layer,
+      // vide les tableaux JS, puis refetch et reconstruit tout.
+      window._dbgHardReset=function(){
+        dlog('warn','⟳ Hard reset — purge buffers WebGL + rechargement...');
+        var found=null;
+        for(var i=0;i<EXPLORERS.length;i++){
+          if(EXPLORERS[i].id===activeExplorer){found=EXPLORERS[i];break;}
+        }
+        if(found){
+          loadExplorer(found);
+          dlog('ok','Hard reset lancé pour : '+found.label);
+        } else {
+          dlog('err','Hard reset : explorateur introuvable (id='+activeExplorer+')');
+        }
+      };
       var firstExp=EXPLORERS[0];
       for(var i=0;i<EXPLORERS.length;i++){if(EXPLORERS[i].id===activeExplorer){firstExp=EXPLORERS[i];break;}}
       loadExplorer(firstExp);
@@ -2322,8 +2394,11 @@ function initApp(){
 var _dbgOpen=false;
 
 // ── Flags de désactivation pour le diagnostic ──
-window._dbgCitationON = true;  // true = Citations actives
-window._dbgBulleON    = true;  // true = Bulles info actives
+window._dbgCitationON = true;   // true = Citations actives
+window._dbgBulleON    = true;   // true = Bulles info actives
+window._dbgQualityLow = false;  // false = high (défaut), true = low
+window._dbgThrottle   = false;  // false = 60fps (défaut), true = throttle ~15fps
+window._dbgRelief     = true;   // true = world-elevation actif, false = globe lisse
 
 window.toggleDbgTools=function(){
   var panel=document.getElementById('dbg-tools');
@@ -2368,6 +2443,34 @@ window.toggleDbgFeature=function(feature){
       });
     }
     dlog(isOn?'ok':'warn','Bulle info → '+(isOn?'ACTIVÉ':'DÉSACTIVÉ'));
+  } else if(feature==='quality'){
+    window._dbgQualityLow = !window._dbgQualityLow;
+    isOn = window._dbgQualityLow;
+    trackEl = document.getElementById('dbg-track-quality');
+    rowEl   = document.getElementById('dbg-row-quality');
+    if(window._arcgisView){
+      window._arcgisView.qualityProfile = isOn ? 'low' : 'high';
+    }
+    dlog(isOn?'warn':'ok','Qualité scène → '+(isOn?'LOW (allégé)':'HIGH (normal)'));
+  } else if(feature==='throttle'){
+    window._dbgThrottle = !window._dbgThrottle;
+    isOn = window._dbgThrottle;
+    trackEl = document.getElementById('dbg-track-throttle');
+    rowEl   = document.getElementById('dbg-row-throttle');
+    dlog(isOn?'warn':'ok','Throttle icônes → '+(isOn?'~15fps ACTIF':'60fps (normal)'));
+  } else if(feature==='relief'){
+    window._dbgRelief = !window._dbgRelief;
+    isOn = window._dbgRelief;
+    trackEl = document.getElementById('dbg-track-relief');
+    rowEl   = document.getElementById('dbg-row-relief');
+    if(window._arcgisView){
+      if(isOn){
+        window._arcgisView.map.ground='world-elevation';
+      } else {
+        window._arcgisView.map.ground.layers.removeAll();
+      }
+    }
+    dlog(isOn?'ok':'warn','Relief terrain → '+(isOn?'world-elevation (restauré)':'DÉSACTIVÉ (globe lisse)'));
   }
   // Mettre à jour le visuel du switch
   if(trackEl){
@@ -2384,6 +2487,20 @@ window.toggleDebug=function(){
   document.getElementById('dbg-tools').classList.toggle('open',_dbgOpen);
 };
 window.clearDbgLog=function(){ document.getElementById('dbg-log').innerHTML=''; };
+
+// ── Moniteur mémoire debug — polling 2s, lecture seule ──
+// Met à jour les 3 compteurs du panneau diagnostic sans aucun effet de bord.
+// _dbgGetStats() est exposé par view.when() une fois ArcGIS initialisé.
+setInterval(function(){
+  if(!window._dbgGetStats) return;
+  var s=window._dbgGetStats();
+  var tEl=document.getElementById('dbg-mem-trail');
+  var iEl=document.getElementById('dbg-mem-icones');
+  var cEl=document.getElementById('dbg-mem-cit');
+  if(tEl) tEl.textContent=s.trail+' pts';
+  if(iEl) iEl.textContent=s.icones+' vis.';
+  if(cEl) cEl.textContent=s.cit+' vis.';
+},2000);
 window.copyDebugLog=function(){
   var lines=[]; 
   document.querySelectorAll('#dbg-log .dl').forEach(function(d){lines.push(d.textContent);});
